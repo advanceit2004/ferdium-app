@@ -36,3 +36,19 @@ A future `brand:apply` script should read a brand package from `whitelabel-brand
 ## Recommended rule
 
 Do not manually edit many files for each client. Add or update a brand package, run the apply script, build, test, and release.
+
+## Starter script added
+
+This fork includes a starter script:
+
+```bash
+pnpm brand:apply ../whitelabel-branding/brands/example
+```
+
+The script currently patches core metadata and copies optional assets. Over time, extend it to replace all remaining Ferdium-specific source constants with imports from `src/brand.generated.ts`.
+
+Useful check:
+
+```bash
+pnpm brand:check
+```
