@@ -210,6 +210,15 @@ jobs:
         with:
           name: ${{ steps.artifact-name.outputs.name }}
           path: |
-            out/**
+            out/*.exe
+            out/*.msi
+            out/*.dmg
+            out/*.AppImage
+            out/*.deb
+            out/*.rpm
+            out/*.tar.gz
+            out/*.zip
+            out/*.yml
+            out/*.blockmap
             build-helpers/brand-build.json
           if-no-files-found: warn
