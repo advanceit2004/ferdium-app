@@ -196,10 +196,19 @@ jobs:
           WIN_CSC_KEY_PASSWORD: ${{ secrets.WIN_CSC_KEY_PASSWORD }}
         run: pnpm build --publish always
 
+      - name: Prepare artifact name
+        id: artifact-name
+        shell: bash
+        run: |
+          safe_brand_path="${{ inputs.brand_path }}"
+          safe_brand_path="${safe_brand_path//\//-}"
+          safe_brand_path="${safe_brand_path// /-}"
+          echo "name=${{ inputs.platform }}-${safe_brand_path}" >> "$GITHUB_OUTPUT"
+
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ inputs.platform }}-${{ inputs.brand_path }}
+          name: ${{ steps.artifact-name.outputs.name }}
           path: |
             out/**
             build-helpers/brand-build.json
