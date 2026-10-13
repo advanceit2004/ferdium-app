@@ -49,7 +49,8 @@
     "add-crowdin-contributors": "ts-node scripts/add-crowdin-contributors.ts",
     "debug": "cross-env-shell DEBUG_COLORS=1 DEBUG=Ferdium:* pnpm start:all-dev",
     "brand:apply": "node scripts/apply-brand.mjs",
-    "brand:check": "git grep -n -E \"Ferdium|ferdium.org|api.ferdium.org|debug.ferdium.org|github.com/ferdium\" -- . \":!pnpm-lock.yaml\" \":!WHITE_LABEL.md\""
+    "brand:check": "node scripts/check-brand.mjs",
+    "brand:check:strict": "node scripts/check-brand.mjs --strict"
   },
   "dependencies": {
     "@adonisjs/ace": "5.1.0",

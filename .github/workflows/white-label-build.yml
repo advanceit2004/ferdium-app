@@ -1,0 +1,189 @@
+name: White-label build
+
+on:
+  workflow_dispatch:
+    inputs:
+      brand_repo:
+        description: 'GitHub repo containing brand packages'
+        required: true
+        default: 'advanceit2004/whitelabel-branding'
+      brand_ref:
+        description: 'Branch, tag, or SHA for the branding repo'
+        required: true
+        default: 'main'
+      brand_path:
+        description: 'Path to brand folder inside the branding repo'
+        required: true
+        default: 'brands/example'
+      mode:
+        description: 'Validate only or build installers'
+        required: true
+        default: 'validate'
+        type: choice
+        options:
+          - validate
+          - build
+      platform:
+        description: 'Platform to build when mode=build'
+        required: true
+        default: 'linux'
+        type: choice
+        options:
+          - linux
+          - windows
+          - macos
+      publish:
+        description: 'Publish with electron-builder when mode=build'
+        required: true
+        default: 'never'
+        type: choice
+        options:
+          - never
+          - always
+
+env:
+  USE_HARD_LINKS: false
+  BRANDING_DIR: ../whitelabel-branding
+
+jobs:
+  validate-brand:
+    name: Validate brand package
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout app fork
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Checkout branding repo
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ inputs.brand_repo }}
+          ref: ${{ inputs.brand_ref }}
+          path: whitelabel-branding
+          token: ${{ secrets.WHITELABEL_BRANDING_TOKEN || github.token }}
+
+      - name: Move branding repo beside app checkout
+        run: |
+          rm -rf ../whitelabel-branding
+          mv whitelabel-branding ../whitelabel-branding
+
+      - name: Use Node.js from .nvmrc
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+
+      - name: Apply brand
+        run: node scripts/apply-brand.mjs "$BRANDING_DIR/${{ inputs.brand_path }}"
+
+      - name: Strict brand check
+        run: node scripts/check-brand.mjs --strict
+
+      - name: Upload generated brand metadata
+        uses: actions/upload-artifact@v4
+        with:
+          name: brand-metadata
+          path: |
+            src/brand.generated.ts
+            build-helpers/brand-build.json
+            package.json
+            electron-builder.yml
+
+  build:
+    name: Build ${{ inputs.platform }}
+    needs: validate-brand
+    if: ${{ inputs.mode == 'build' }}
+    runs-on: ${{ inputs.platform == 'macos' && 'macos-14' || inputs.platform == 'windows' && 'windows-2022' || 'ubuntu-24.04' }}
+    steps:
+      - name: Checkout app fork
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Checkout branding repo
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ inputs.brand_repo }}
+          ref: ${{ inputs.brand_ref }}
+          path: whitelabel-branding
+          token: ${{ secrets.WHITELABEL_BRANDING_TOKEN || github.token }}
+
+      - name: Move branding repo beside app checkout
+        shell: bash
+        run: |
+          rm -rf ../whitelabel-branding
+          mv whitelabel-branding ../whitelabel-branding
+
+      - name: Use Node.js from .nvmrc
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Install Linux package dependencies
+        if: ${{ inputs.platform == 'linux' }}
+        run: sudo apt-get update -y && sudo apt-get install --no-install-recommends -y rpm ruby ruby-dev && sudo gem install fpm --no-document
+
+      - name: Install node dependencies
+        uses: nick-fields/retry@v3
+        with:
+          command: pnpm i
+          timeout_minutes: 20
+          max_attempts: 3
+          retry_on: error
+
+      - name: Apply brand
+        shell: bash
+        run: node scripts/apply-brand.mjs "$BRANDING_DIR/${{ inputs.brand_path }}"
+
+      - name: Strict brand check
+        shell: bash
+        run: node scripts/check-brand.mjs --strict
+
+      - name: Package recipes
+        shell: bash
+        working-directory: ./recipes
+        run: |
+          pnpm i
+          pnpm package
+
+      - name: Typecheck and test
+        shell: bash
+        run: |
+          pnpm typecheck
+          pnpm test
+
+      - name: Build without publishing
+        if: ${{ inputs.publish == 'never' }}
+        shell: bash
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: false
+        run: pnpm build --publish never
+
+      - name: Build and publish
+        if: ${{ inputs.publish == 'always' }}
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.FERDIUM_PUBLISH_TOKEN || github.token }}
+          CSC_IDENTITY_AUTO_DISCOVERY: ${{ inputs.platform == 'macos' && 'true' || 'false' }}
+          APPLEID: ${{ secrets.APPLEID }}
+          APPLEID_PASSWORD: ${{ secrets.APPLEID_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          CSC_LINK: ${{ secrets.CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+          WIN_CSC_LINK: ${{ secrets.WIN_CSC_LINK }}
+          WIN_CSC_KEY_PASSWORD: ${{ secrets.WIN_CSC_KEY_PASSWORD }}
+        run: pnpm build --publish always
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.platform }}-${{ inputs.brand_path }}
+          path: |
+            out/**
+            build-helpers/brand-build.json
+          if-no-files-found: warn
