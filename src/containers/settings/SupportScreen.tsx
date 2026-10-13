@@ -1,10 +1,10 @@
-import SupportFerdium from '../../components/settings/supportFerdium/SupportFerdiumDashboard';
+import AboutApp from '../../components/settings/aboutApp/AboutAppDashboard';
 import ErrorBoundary from '../../components/util/ErrorBoundary';
 
 const SupportScreen = () => {
   return (
     <ErrorBoundary>
-      <SupportFerdium />
+      <AboutApp />
     </ErrorBoundary>
   );
 };

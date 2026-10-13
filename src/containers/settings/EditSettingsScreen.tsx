@@ -40,12 +40,12 @@ import globalMessages from '../../i18n/globalMessages';
 import { ifUndefined } from '../../jsUtils';
 import { menuItems } from '../../lib/Menu';
 
-const debug = require('../../preload-safe-debug')('Ferdium:EditSettingsScreen');
+const debug = require('../../preload-safe-debug')('App:EditSettingsScreen');
 
 const messages = defineMessages({
   autoLaunchOnStart: {
     id: 'settings.app.form.autoLaunchOnStart',
-    defaultMessage: 'Launch Ferdium on start',
+    defaultMessage: 'Launch app on start',
   },
   autoLaunchInBackground: {
     id: 'settings.app.form.autoLaunchInBackground',
@@ -53,7 +53,7 @@ const messages = defineMessages({
   },
   runInBackground: {
     id: 'settings.app.form.runInBackground',
-    defaultMessage: 'Keep Ferdium in background when closing the window',
+    defaultMessage: 'Keep app in background when closing the window',
   },
   startMinimized: {
     id: 'settings.app.form.startMinimized',
@@ -61,19 +61,19 @@ const messages = defineMessages({
   },
   confirmOnQuit: {
     id: 'settings.app.form.confirmOnQuit',
-    defaultMessage: 'Confirm when quitting Ferdium',
+    defaultMessage: 'Confirm when quitting the app',
   },
   enableSystemTray: {
     id: 'settings.app.form.enableSystemTray',
-    defaultMessage: 'Show Ferdium in System Tray',
+    defaultMessage: 'Show app in System Tray',
   },
   enableMenuBar: {
     id: 'settings.app.form.enableMenuBar',
-    defaultMessage: 'Always show Ferdium in Menu Bar',
+    defaultMessage: 'Always show app in Menu Bar',
   },
   reloadAfterResume: {
     id: 'settings.app.form.reloadAfterResume',
-    defaultMessage: 'Reload Ferdium after system resume',
+    defaultMessage: 'Reload app after system resume',
   },
   reloadAfterResumeTime: {
     id: 'settings.app.form.reloadAfterResumeTime',
@@ -82,11 +82,11 @@ const messages = defineMessages({
   },
   minimizeToSystemTray: {
     id: 'settings.app.form.minimizeToSystemTray',
-    defaultMessage: 'Minimize Ferdium to system tray',
+    defaultMessage: 'Minimize app to system tray',
   },
   closeToSystemTray: {
     id: 'settings.app.form.closeToSystemTray',
-    defaultMessage: 'Close Ferdium to system tray',
+    defaultMessage: 'Close app to system tray',
   },
   privateNotifications: {
     id: 'settings.app.form.privateNotifications',
@@ -172,7 +172,7 @@ const messages = defineMessages({
   },
   useTouchIdToUnlock: {
     id: 'settings.app.form.useTouchIdToUnlock',
-    defaultMessage: 'Allow using TouchID to unlock Ferdium',
+    defaultMessage: 'Allow using TouchID to unlock the app',
   },
   inactivityLock: {
     id: 'settings.app.form.inactivityLock',
@@ -332,7 +332,7 @@ const messages = defineMessages({
   },
   enableGlobalHideShortcut: {
     id: 'settings.app.form.enableGlobalHideShortcut',
-    defaultMessage: 'Enable Global shortcut to hide Ferdium',
+    defaultMessage: 'Enable Global shortcut to hide the app',
   },
   beta: {
     id: 'settings.app.form.beta',
@@ -344,7 +344,7 @@ const messages = defineMessages({
   },
   enableTodos: {
     id: 'settings.app.form.enableTodos',
-    defaultMessage: 'Enable Ferdium Todos',
+    defaultMessage: 'Enable Todos',
   },
   keepAllWorkspacesLoaded: {
     id: 'settings.app.form.keepAllWorkspacesLoaded',
@@ -357,7 +357,7 @@ const messages = defineMessages({
   },
   restartDialogTitle: {
     id: 'settings.app.restart.restartDialogTitle',
-    defaultMessage: 'Ferdium - Relaunch Application',
+    defaultMessage: 'Relaunch Application',
   },
   restartNow: {
     id: 'settings.app.restart.restartNow',
@@ -369,12 +369,12 @@ const messages = defineMessages({
   },
   restartDialogMessage: {
     id: 'settings.app.restart.restartDialogMessage',
-    defaultMessage: 'Do you want to relaunch Ferdium?',
+    defaultMessage: 'Do you want to relaunch the app?',
   },
   restartDialogDetail: {
     id: 'settings.app.restart.restartDialogDetail',
     defaultMessage:
-      'You made a change that requires a restart. This will close Ferdium and restart it.',
+      'You made a change that requires a restart. This will close the app and restart it.',
   },
   sandboxServices: {
     id: 'settings.app.form.sandboxServices',
