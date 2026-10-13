@@ -7,6 +7,7 @@ import {
   injectIntl,
 } from 'react-intl';
 import type { StoresProps } from '../../@types/ferdium-components.types';
+import { BRAND } from '../../brand.generated';
 import { serverName } from '../../api/apiBase';
 import shuffleArray from '../../helpers/array-helpers';
 import serverlessLogin from '../../helpers/serverless-helpers';
@@ -34,7 +35,7 @@ const messages = defineMessages({
   },
   serverless: {
     id: 'services.serverless',
-    defaultMessage: 'Use Ferdium without an Account',
+    defaultMessage: 'Use without an Account',
   },
 });
 
@@ -68,7 +69,7 @@ class Welcome extends Component<IProps> {
           />
         </div>
         <div className="welcome__text">
-          <H1>Ferdium</H1>
+          <H1>{BRAND.appName}</H1>
         </div>
         <div className="welcome__buttons">
           <Link to={signupRoute} className="button button__inverted">

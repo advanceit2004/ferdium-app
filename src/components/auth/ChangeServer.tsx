@@ -7,6 +7,7 @@ import {
   defineMessages,
   injectIntl,
 } from 'react-intl';
+import { BRAND } from '../../brand.generated';
 import { LIVE_FERDIUM_API, LIVE_FRANZ_API } from '../../config';
 import { url, required } from '../../helpers/validation-helpers';
 import globalMessages from '../../i18n/globalMessages';
@@ -30,7 +31,8 @@ const messages = defineMessages({
   },
   warning: {
     id: 'changeserver.warning',
-    defaultMessage: 'Extra settings offered by Ferdium will not be saved',
+    defaultMessage:
+      'Extra settings offered by the default server will not be saved',
   },
   customServerLabel: {
     id: 'changeserver.customServerLabel',
@@ -66,7 +68,7 @@ class ChangeServer extends Component<IProps> {
           label: this.props.intl.formatMessage(messages.label),
           value: this.props.server,
           options: [
-            { value: this.ferdiumServer, label: 'Ferdium (Default)' },
+            { value: this.ferdiumServer, label: `${BRAND.appName} (Default)` },
             { value: this.franzServer, label: 'Franz' },
             {
               value: this.defaultServers.includes(this.props.server)
