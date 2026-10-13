@@ -157,15 +157,32 @@ jobs:
           pnpm typecheck
           pnpm test
 
-      - name: Build without publishing
-        if: ${{ inputs.publish == 'never' }}
+      - name: Build Linux without publishing
+        if: ${{ inputs.publish == 'never' && inputs.platform == 'linux' }}
+        shell: bash
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: false
+        # Intentionally skip Snap in white-label CI because it requires snapcraft/LXD setup.
+        run: pnpm build --linux AppImage deb tar.gz rpm --publish never
+
+      - name: Build desktop without publishing
+        if: ${{ inputs.publish == 'never' && inputs.platform != 'linux' }}
         shell: bash
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: false
         run: pnpm build --publish never
 
-      - name: Build and publish
-        if: ${{ inputs.publish == 'always' }}
+      - name: Build and publish Linux
+        if: ${{ inputs.publish == 'always' && inputs.platform == 'linux' }}
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.FERDIUM_PUBLISH_TOKEN || github.token }}
+          CSC_IDENTITY_AUTO_DISCOVERY: false
+        # Intentionally skip Snap in white-label CI because it requires snapcraft/LXD setup.
+        run: pnpm build --linux AppImage deb tar.gz rpm --publish always
+
+      - name: Build and publish desktop
+        if: ${{ inputs.publish == 'always' && inputs.platform != 'linux' }}
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.FERDIUM_PUBLISH_TOKEN || github.token }}
