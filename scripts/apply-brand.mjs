@@ -17,14 +17,43 @@ if (!fs.existsSync(brandPath)) {
   process.exit(1);
 }
 
-const brand = JSON.parse(fs.readFileSync(brandPath, 'utf8'));
+const rawBrand = JSON.parse(fs.readFileSync(brandPath, 'utf8'));
 const required = ['appName', 'appSlug', 'appId', 'protocol', 'website', 'supportEmail', 'accentColor', 'github'];
 for (const key of required) {
-  if (brand[key] == null) {
+  if (rawBrand[key] == null) {
     console.error(`brand.json missing required key: ${key}`);
     process.exit(1);
   }
 }
+
+const brand = {
+  description: 'A white-label desktop workspace for messaging and collaboration services.',
+  privacyUrl: '',
+  termsUrl: '',
+  translationUrl: '',
+  copyright: '',
+  author: '',
+  ...rawBrand,
+  api: {
+    defaultServerUrl: 'local',
+    debugUrl: '',
+    translatorUrl: '',
+    ...(rawBrand.api ?? {}),
+  },
+  github: {
+    owner: '',
+    repo: '',
+    ...(rawBrand.github ?? {}),
+  },
+  features: {
+    accounts: false,
+    todos: true,
+    workspaces: true,
+    autoUpdates: true,
+    sentry: false,
+    ...(rawBrand.features ?? {}),
+  },
+};
 
 function writeJson(file, value) {
   fs.writeFileSync(file, `${JSON.stringify(value, null, 2)}\n`);

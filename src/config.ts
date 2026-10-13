@@ -3,9 +3,10 @@
 import ms from 'ms';
 import { defineMessages } from 'react-intl';
 
+import { BRAND } from './brand.generated';
 import { shiftKey } from './environment';
 
-export const DEFAULT_ACCENT_COLOR = '#7367F0';
+export const DEFAULT_ACCENT_COLOR = BRAND.accentColor ?? '#7367F0';
 
 export const CHECK_INTERVAL = ms('1h'); // How often should we perform checks
 
@@ -14,11 +15,14 @@ export const LOCAL_PORT = 46_569;
 export const LOCAL_API = 'http://localhost:3000';
 export const DEV_FRANZ_API = 'https://dev.franzinfra.com';
 
-export const LIVE_FERDIUM_API = 'https://api.ferdium.org';
+export const LIVE_FERDIUM_API =
+  BRAND.api?.defaultServerUrl && BRAND.api.defaultServerUrl !== 'local'
+    ? BRAND.api.defaultServerUrl
+    : 'https://api.ferdium.org';
 export const LIVE_FRANZ_API = 'https://api.franzinfra.com';
 
 // URL used to submit debugger information, see https://github.com/ferdium/debugger
-export const DEBUG_API = 'https://debug.ferdium.org';
+export const DEBUG_API = BRAND.api?.debugUrl || 'https://debug.ferdium.org';
 
 export const LOCAL_WS_API = 'ws://localhost:3000';
 export const DEV_WS_API = 'wss://dev.franzinfra.com';
@@ -26,9 +30,9 @@ export const LIVE_WS_API = 'wss://api.franzinfra.com';
 
 export const LOCAL_API_WEBSITE = 'http://localhost:3333';
 export const DEV_API_FRANZ_WEBSITE = 'https://meetfranz.com';
-export const LIVE_API_FERDIUM_WEBSITE = 'https://ferdium.org';
+export const LIVE_API_FERDIUM_WEBSITE = BRAND.website ?? 'https://ferdium.org';
 export const LIVE_API_FERDIUM_LIBRETRANSLATE =
-  'https://translator.ferdium.org/translate';
+  BRAND.api?.translatorUrl || 'https://translator.ferdium.org/translate';
 
 export const LOCAL_TODOS_FRONTEND_URL = 'http://localhost:4000';
 export const PRODUCTION_TODOS_FRONTEND_URL = 'https://app.franztodos.com';
@@ -285,7 +289,7 @@ export const TRANSLATOR_ENGINE_GOOGLE = 'Google';
 export const TRANSLATOR_ENGINE_LIBRETRANSLATE = 'LibreTranslate';
 export const TRANSLATOR_ENGINE_NAMES = {
   [TRANSLATOR_ENGINE_LIBRETRANSLATE]:
-    'Ferdium Translator (Powered by LibreTranslate)',
+    `${BRAND.appName ?? 'Ferdium'} Translator (Powered by LibreTranslate)`,
   [TRANSLATOR_ENGINE_GOOGLE]: 'Google',
 };
 
@@ -540,18 +544,32 @@ export const DEFAULT_WINDOW_OPTIONS = {
 };
 
 export const GITHUB_FRANZ_URL = 'https://github.com/meetfranz';
-export const GITHUB_FERDIUM_URL = 'https://github.com/ferdium';
-export const FERDIUM_SERVICE_REQUEST = `${GITHUB_FERDIUM_URL}/ferdium-app/issues`;
-export const FERDIUM_TRANSLATION = 'https://crowdin.com/project/ferdium-app';
+export const GITHUB_FERDIUM_URL = `https://github.com/${
+  BRAND.github?.owner ?? 'ferdium'
+}`;
+export const FERDIUM_SERVICE_REQUEST = `${GITHUB_FERDIUM_URL}/${
+  BRAND.github?.repo ?? 'ferdium-app'
+}/issues`;
+export const FERDIUM_TRANSLATION =
+  BRAND.translationUrl ?? 'https://crowdin.com/project/ferdium-app';
 export const FERDIUM_DEV_DOCS =
   'https://github.com/ferdium/ferdium-recipes/blob/main/docs/integration.md';
 
 export const FILE_SYSTEM_SETTINGS_TYPES = ['app', 'proxy', 'shortcuts'];
 
-export const LOCAL_SERVER = 'You are using Ferdium without a server';
-export const SERVER_NOT_LOADED = 'Ferdium::SERVER_NOT_LOADED';
+export const LOCAL_SERVER = `You are using ${
+  BRAND.appName ?? 'Ferdium'
+} without a server`;
+export const SERVER_NOT_LOADED = `${
+  BRAND.appName ?? 'Ferdium'
+}::SERVER_NOT_LOADED`;
 
-export const ALLOWED_PROTOCOLS = ['https:', 'http:', 'ftp:', 'ferdium:'];
+export const ALLOWED_PROTOCOLS = [
+  'https:',
+  'http:',
+  'ftp:',
+  `${BRAND.protocol ?? 'ferdium'}:`,
+];
 
 export const DEFAULT_TODOS_WIDTH = 300;
 export const TODOS_MIN_WIDTH = 200;
