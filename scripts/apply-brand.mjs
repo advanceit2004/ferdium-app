@@ -151,10 +151,14 @@ if (brand.github?.owner && brand.github?.repo) {
 }
 
 // 6) Optional assets
+copyIfExists('assets/logo.svg', 'src/assets/images/logo.svg');
+copyIfExists('assets/logo.svg', 'src/assets/images/logo-beard-only.svg');
 copyIfExists('assets/icon.icns', 'build-helpers/images/icon.icns');
 copyIfExists('assets/icon.ico', 'build-helpers/images/icon.ico');
 copyIfExists('assets/icon.png', 'build-helpers/images/icon.png');
+copyIfExists('assets/icon.png', 'src/assets/images/icon.png');
 copyIfExists('assets/icons', 'build-helpers/images/icons');
+copyIfExists('assets/icons', 'src/assets/images/icons');
 copyIfExists('assets/installer/dmgInstaller.tiff', 'build-helpers/images/dmgInstaller.tiff');
 
 console.log(`Applied brand: ${brand.appName} (${brand.appSlug})`);
