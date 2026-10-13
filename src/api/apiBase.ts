@@ -10,6 +10,7 @@ import {
  * Get API base URL from store
  */
 import { API_VERSION } from '../environment-remote';
+import { BRAND } from '../brand.generated';
 import { fixUrl } from '../helpers/url-helpers';
 
 // Note: This cannot be used from the internal-server since we are not running within the context of a browser window
@@ -50,6 +51,9 @@ export const serverBase = () => {
   const serverType = (window as any).ferdium.stores.settings.all.app.server;
   const noServerFerdi = 'You are using Ferdi without a server';
   const noServerFerdium = 'You are using Ferdium without a server';
+  const noServerBrand = `You are using ${
+    BRAND.appName ?? 'Ferdium'
+  } without a server`;
 
   let terms;
   switch (serverType) {
@@ -61,7 +65,8 @@ export const serverBase = () => {
       terms = LIVE_FERDIUM_API;
       break;
     }
-    case noServerFerdium: {
+    case noServerFerdium:
+    case noServerBrand: {
       terms = LIVE_FERDIUM_API;
       break;
     }
@@ -77,6 +82,9 @@ export const serverName = (): string => {
   const serverType = (window as any).ferdium.stores.settings.all.app.server;
   const noServerFerdi = 'You are using Ferdi without a server';
   const noServerFerdium = 'You are using Ferdium without a server';
+  const noServerBrand = `You are using ${
+    BRAND.appName ?? 'Ferdium'
+  } without a server`;
 
   let nameServer;
   switch (serverType) {
@@ -85,14 +93,15 @@ export const serverName = (): string => {
       break;
     }
     case LIVE_FERDIUM_API: {
-      nameServer = 'Ferdium';
+      nameServer = BRAND.appName ?? 'Ferdium';
       break;
     }
     case noServerFerdi: {
       nameServer = 'No';
       break;
     }
-    case noServerFerdium: {
+    case noServerFerdium:
+    case noServerBrand: {
       nameServer = 'No';
       break;
     }

@@ -52,3 +52,17 @@ Useful check:
 ```bash
 pnpm brand:check
 ```
+
+## Source-level brand constants
+
+Core brand-sensitive source constants now import `BRAND` from `src/brand.generated.ts`. The default committed file preserves Ferdium-compatible values; client builds should regenerate it with `pnpm brand:apply <brand-folder>`.
+
+Current centralized areas include:
+
+- Accent color
+- API/website/debug/translator URLs
+- GitHub issue/update repo metadata
+- Local/no-server display string
+- Deeplink protocol
+- Allowed custom protocol list
+- Server display naming
