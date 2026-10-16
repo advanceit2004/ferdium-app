@@ -4,12 +4,32 @@ This repository is the desktop app fork. Keep it close to upstream and put clien
 
 ## Upstream sync workflow
 
+This fork tracks **stable release tags** (e.g. `v7.2.3`), not the upstream nightly
+`develop` branch. The branding layer is a small stack of commits on top of a chosen
+stable tag, so upgrades are done by **rebasing the branding commits onto the new tag**
+(not by merging `upstream/develop`, which would pull in nightly code).
+
 ```bash
-git remote add upstream https://github.com/ferdium/ferdium-app.git # first time only
-git fetch upstream
-git checkout develop
-git merge upstream/develop
-# then re-apply generated branding files/assets
+git remote add upstream https://github.com/ferdium/ferdium-app.git   # first time only
+git fetch upstream --tags
+
+# Safety net: keep the current commit reachable on the remote before rewriting history.
+git tag pre-<newtag>-backup develop
+git push origin refs/tags/pre-<newtag>-backup
+
+# Replay only the branding commits. <oldtag> is the previous stable base.
+git rebase --onto <newtag> <oldtag> develop
+# resolve any trivial conflicts, then:
+git push --force-with-lease origin develop
+```
+
+Current baseline: **`v7.2.3`**. So the next sync (say to `v7.2.4`) is:
+
+```bash
+git fetch upstream --tags
+git tag pre-v7.2.4-backup develop && git push origin refs/tags/pre-v7.2.4-backup
+git rebase --onto v7.2.4 v7.2.3 develop
+git push --force-with-lease origin develop
 ```
 
 ## Companion repositories
