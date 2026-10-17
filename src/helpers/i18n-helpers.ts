@@ -1,3 +1,4 @@
+import { sanitizeBrandText } from '../i18n/brand-i18n';
 import generatedTranslations from '../i18n/translations';
 
 const locales = generatedTranslations();
@@ -39,9 +40,11 @@ export const getTranslatedText = (
       });
     }
 
-    return text;
+    // Callers pass an English `fallback` used when the active locale is missing
+    // the key; that fallback never went through the sanitized locale files.
+    return sanitizeBrandText(text);
   } catch {
-    return fallback;
+    return sanitizeBrandText(fallback);
   }
 };
 
