@@ -175,8 +175,10 @@ class RecipesScreen extends Component<IProps, IState> {
           recipeFilter={filter}
           recipeDirectory={recipeDirectory}
           openRecipeDirectory={() => openPath(recipeDirectory)}
-          openDevDocs={() =>
-            appActions.openExternalUrl({ url: FERDIUM_DEV_DOCS })
+          openDevDocs={
+            FERDIUM_DEV_DOCS
+              ? () => appActions.openExternalUrl({ url: FERDIUM_DEV_DOCS })
+              : undefined
           }
         />
       </ErrorBoundary>

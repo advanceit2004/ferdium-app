@@ -23,6 +23,7 @@ import enforceMacOSAppLocation from './enforce-macos-app-location';
 
 initializeRemote();
 
+import { BRAND } from './brand.generated';
 import {
   DEFAULT_APP_SETTINGS,
   DEFAULT_SHORTCUTS,
@@ -645,15 +646,15 @@ app.on('ready', () => {
         arguments: `${extraArgs}--reset-window`,
         iconPath,
         iconIndex: 0,
-        title: 'Move Ferdium to Current Display',
-        description: 'Restore the position and size of Ferdium',
+        title: `Move ${BRAND.appName} to Current Display`,
+        description: `Restore the position and size of ${BRAND.appName}`,
       },
       {
         program: process.execPath,
         arguments: `${extraArgs}--quit`,
         iconPath,
         iconIndex: 0,
-        title: 'Quit Ferdium',
+        title: `Quit ${BRAND.appName}`,
         description: '',
       },
     ]);
@@ -933,7 +934,7 @@ app.on('before-quit', event => {
     selection = dialog.showMessageBoxSync(mainWindow!, {
       type: 'question',
       message: 'Quit',
-      detail: 'Do you really want to quit Ferdium?',
+      detail: `Do you really want to quit ${BRAND.appName}?`,
       buttons: ['Yes', 'No'],
     });
   }

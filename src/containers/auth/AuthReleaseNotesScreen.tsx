@@ -5,6 +5,7 @@ import { mdiArrowLeftCircle } from '@mdi/js';
 import Markdown from 'markdown-to-jsx';
 import { type IntlShape, defineMessages, injectIntl } from 'react-intl';
 import Icon from '../../components/ui/icon';
+import { BRAND } from '../../brand.generated';
 import { ferdiumVersion } from '../../environment-remote';
 import {
   getFerdiumVersion,
@@ -75,7 +76,8 @@ class AuthReleaseNotesScreen extends Component<IProps, IState> {
         <div className="auth__main--releasenotes">
           <div className="auth__header">
             <span className="auth__header-item">
-              Ferdium {getFerdiumVersion(window.location.href, ferdiumVersion)}{' '}
+              {BRAND.appName}{' '}
+              {getFerdiumVersion(window.location.href, ferdiumVersion)}{' '}
               {' | '}
             </span>
             <span className="auth__header-item__secondary">

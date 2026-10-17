@@ -13,6 +13,7 @@ import {
 } from 'electron';
 import macosVersion from 'macos-version';
 
+import { BRAND } from '../brand.generated';
 import { isLinux, isMac, isWindows } from '../environment';
 import { getTranslatedText } from '../helpers/i18n-helpers';
 import LinuxTray, { type LinuxTrayMenuItem } from './LinuxTray';
@@ -185,7 +186,7 @@ export default class TrayIcon {
     }
 
     this.tray = new Tray(this._getAsset('tray', INDICATOR_TRAY_PLAIN));
-    this.tray.setToolTip('Ferdium');
+    this.tray.setToolTip(BRAND.appName);
 
     this.trayMenu = Menu.buildFromTemplate(this.trayMenuTemplate(this));
 

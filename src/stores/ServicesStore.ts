@@ -8,6 +8,7 @@ import ms from 'ms';
 import type { Stores } from '../@types/stores.types';
 import type { Actions } from '../actions/lib/actions';
 import type { ApiInterface } from '../api';
+import { BRAND } from '../brand.generated';
 import { DEFAULT_SERVICE_SETTINGS, KEEP_WS_LOADED_USID } from '../config';
 import { ferdiumVersion } from '../environment-remote';
 import { workspaceStore } from '../features/workspaces';
@@ -1276,7 +1277,7 @@ export default class ServicesStore extends TypedStore {
   _updateWindowTitleReaction() {
     const service = this.active;
     if (service) {
-      document.title = `Ferdium - ${service.name}${
+      document.title = `${BRAND.appName} - ${service.name}${
         service.dialogTitle ? ` - ${service.dialogTitle}` : ''
       }${service.pageTitle ? ` - ${service.pageTitle}` : ''}`;
     } else {

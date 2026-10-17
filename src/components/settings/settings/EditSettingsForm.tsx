@@ -11,6 +11,7 @@ import {
   injectIntl,
 } from 'react-intl';
 import tinycolor from 'tinycolor2';
+import { BRAND } from '../../../brand.generated';
 import {
   DEFAULT_ACCENT_COLOR,
   DEFAULT_APP_SETTINGS,
@@ -1117,15 +1118,17 @@ class EditSettingsForm extends Component<IProps, IState> {
 
                 <Hr />
 
-                <a
-                  href={FERDIUM_TRANSLATION}
-                  target="_blank"
-                  className="link"
-                  rel="noreferrer"
-                >
-                  {intl.formatMessage(messages.translationHelp)}{' '}
-                  <Icon icon={mdiOpenInNew} />
-                </a>
+                {FERDIUM_TRANSLATION && (
+                  <a
+                    href={FERDIUM_TRANSLATION}
+                    target="_blank"
+                    className="link"
+                    rel="noreferrer"
+                  >
+                    {intl.formatMessage(messages.translationHelp)}{' '}
+                    <Icon icon={mdiOpenInNew} />
+                  </a>
+                )}
               </div>
             )}
 
@@ -1423,7 +1426,7 @@ class EditSettingsForm extends Component<IProps, IState> {
                   </>
                 )}
                 <p className="settings__message">
-                  <Icon icon={mdiGithub} /> Ferdium is based on{' '}
+                  <Icon icon={mdiGithub} /> {BRAND.appName} is based on{' '}
                   <a
                     href={`${GITHUB_FRANZ_URL}/franz`}
                     target="_blank"
@@ -1433,7 +1436,7 @@ class EditSettingsForm extends Component<IProps, IState> {
                   </a>
                   , a project published under the{' '}
                   <a
-                    href={`${GITHUB_FERDIUM_URL}/ferdium-app/blob/master/LICENSE.md`}
+                    href={`${GITHUB_FERDIUM_URL}/${BRAND.github.repo}/blob/master/LICENSE.md`}
                     target="_blank"
                     rel="noreferrer"
                   >

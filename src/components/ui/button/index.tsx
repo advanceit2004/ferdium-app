@@ -183,7 +183,7 @@ class ButtonComponent extends Component<IProps, IState> {
     if (loaded) {
       showLoader = !loaded;
       console.warn(
-        'Ferdium Button prop `loaded` will be deprecated in the future. Please use `busy` instead',
+        'Button prop `loaded` will be deprecated in the future. Please use `busy` instead',
       );
     }
 
