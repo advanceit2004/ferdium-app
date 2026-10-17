@@ -50,7 +50,8 @@
     "debug": "cross-env-shell DEBUG_COLORS=1 DEBUG=Ferdium:* pnpm start:all-dev",
     "brand:apply": "node scripts/apply-brand.mjs",
     "brand:check": "node scripts/check-brand.mjs",
-    "brand:check:strict": "node scripts/check-brand.mjs --strict"
+    "brand:check:strict": "node scripts/check-brand.mjs --strict",
+    "brand:report": "node scripts/check-brand.mjs --report"
   },
   "dependencies": {
     "@adonisjs/ace": "5.1.0",
