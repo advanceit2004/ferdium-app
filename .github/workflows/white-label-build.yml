@@ -176,7 +176,7 @@ jobs:
         if: ${{ inputs.publish == 'always' && inputs.platform == 'linux' }}
         shell: bash
         env:
-          GH_TOKEN: ${{ secrets.FERDIUM_PUBLISH_TOKEN || github.token }}
+          GH_TOKEN: ${{ secrets.WHITELABEL_PUBLISH_TOKEN || github.token }}
           CSC_IDENTITY_AUTO_DISCOVERY: false
         # Intentionally skip Snap in white-label CI because it requires snapcraft/LXD setup.
         run: pnpm build --linux AppImage deb tar.gz rpm --publish always
@@ -185,7 +185,7 @@ jobs:
         if: ${{ inputs.publish == 'always' && inputs.platform != 'linux' }}
         shell: bash
         env:
-          GH_TOKEN: ${{ secrets.FERDIUM_PUBLISH_TOKEN || github.token }}
+          GH_TOKEN: ${{ secrets.WHITELABEL_PUBLISH_TOKEN || github.token }}
           CSC_IDENTITY_AUTO_DISCOVERY: ${{ inputs.platform == 'macos' && 'true' || 'false' }}
           APPLEID: ${{ secrets.APPLEID }}
           APPLEID_PASSWORD: ${{ secrets.APPLEID_PASSWORD }}

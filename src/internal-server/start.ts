@@ -19,6 +19,7 @@ import { join } from 'node:path';
 import fold from '@adonisjs/fold';
 import { Ignitor, hooks } from '@adonisjs/ignitor';
 import { chmod, readFile, stat, writeFile } from 'fs-extra';
+import { BRAND } from '../brand.generated';
 import { LOCAL_HOSTNAME } from '../config';
 import { isWindows } from '../environment';
 
@@ -54,6 +55,8 @@ export const server = async (userPath: string, port: number, token: string) => {
   process.env.HOST = LOCAL_HOSTNAME;
   process.env.PORT = port.toString();
   process.env.FERDIUM_LOCAL_TOKEN = token;
+  // Adonis resolves its application name from APP_NAME (see `config/app.js`).
+  process.env.APP_NAME = `${BRAND.appName} Internal Server`;
 
   return new Promise<void>((resolve, reject) => {
     let returned = false;
