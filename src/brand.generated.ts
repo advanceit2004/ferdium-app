@@ -21,12 +21,26 @@ export const BRAND = {
     owner: 'ferdium',
     repo: 'ferdium-app',
   },
+  recipes: {
+    url: 'https://github.com/ferdium/ferdium-recipes',
+    branch: 'main',
+  },
   features: {
     accounts: true,
     todos: true,
     workspaces: true,
     autoUpdates: true,
     sentry: true,
+  },
+  // Tokens that upstream bakes into strings/locales and that the runtime brand
+  // sanitizer must neutralize. Client brands override these via `brand.json`'s
+  // optional `legacy` block. When the active brand *is* upstream, these collapse
+  // to no-ops.
+  legacy: {
+    names: ['Ferdium'],
+    domains: ['www.ferdium.org', 'ferdium.org'],
+    githubOwners: ['ferdium'],
+    tokens: {},
   },
 } as const;
 

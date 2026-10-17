@@ -1,7 +1,8 @@
 import { inject, observer } from 'mobx-react';
-import { Component, type ReactNode } from 'react';
-import { IntlProvider } from 'react-intl';
+import { useCallback, useEffect, type ReactNode } from 'react';
+import type { IntlShape } from 'react-intl';
 
+import BrandIntlProvider from './i18n/brand-intl';
 import generatedTranslations from './i18n/translations';
 import type AppStore from './stores/AppStore';
 import type UserStore from './stores/UserStore';
@@ -16,30 +17,27 @@ interface Props {
   children: ReactNode;
 }
 
-class I18N extends Component<Props> {
-  componentDidUpdate(): void {
+const I18N = ({ stores, children }: Props) => {
+  const { locale } = stores.app;
+
+  const handleIntlChange = useCallback((intl: IntlShape) => {
+    window['ferdium'].intl = intl;
+  }, []);
+
+  useEffect(() => {
     window['ferdium'].menu.rebuild();
-  }
+  }, [locale]);
 
-  render(): ReactNode {
-    const { stores, children } = this.props;
-    const { locale } = stores.app;
-
-    return (
-      <IntlProvider
-        locale={locale}
-        key={locale}
-        messages={translations[locale]}
-        ref={intlProvider => {
-          window['ferdium'].intl = intlProvider
-            ? intlProvider.state.intl
-            : null;
-        }}
-      >
-        {children}
-      </IntlProvider>
-    );
-  }
-}
+  return (
+    <BrandIntlProvider
+      key={locale}
+      locale={locale}
+      messages={translations[locale]}
+      onIntlChange={handleIntlChange}
+    >
+      {children}
+    </BrandIntlProvider>
+  );
+};
 
 export default inject('stores')(observer(I18N));
