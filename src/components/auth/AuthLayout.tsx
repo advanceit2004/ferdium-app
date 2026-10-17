@@ -10,6 +10,7 @@ import {
 } from 'react';
 import { type WrappedComponentProps, injectIntl } from 'react-intl';
 import { serverName } from '../../api/apiBase';
+import { BRAND } from '../../brand.generated';
 import { GITHUB_FERDIUM_URL } from '../../config';
 import { isSnap, isWindows } from '../../environment';
 import { Component as PublishDebugInfo } from '../../features/publishDebugInfo';
@@ -114,7 +115,7 @@ class AuthLayout extends Component<IProps, IState> {
           </div>
           {/* </div> */}
           <Link
-            to={`${GITHUB_FERDIUM_URL}/ferdium-app`}
+            to={`${GITHUB_FERDIUM_URL}/${BRAND.github.repo}`}
             className="auth__adlk"
             target="_blank"
           >

@@ -15,10 +15,12 @@ import { type IntlShape, defineMessages } from 'react-intl';
 import semver from 'semver';
 import type { StoresProps } from '../@types/ferdium-components.types';
 import { importExportURL, serverBase, serverName } from '../api/apiBase';
+import { BRAND } from '../brand.generated';
 // @ts-expect-error Cannot find module '../buildInfo.json' or its corresponding type declarations.
 import { gitBranch, gitHashShort, timestamp } from '../buildInfo.json';
 import {
   CUSTOM_WEBSITE_RECIPE_ID,
+  DEBUG_API,
   DEFAULT_SHORTCUTS,
   LIVE_API_FERDIUM_WEBSITE,
 } from '../config';
@@ -983,8 +985,8 @@ class FranzMenu implements StoresProps {
         dialog
           .showMessageBox({
             type: 'info',
-            title: 'Ferdium',
-            message: 'Ferdium',
+            title: BRAND.appName,
+            message: BRAND.appName,
             detail: aboutAppDetails,
             buttons: [
               intl.formatMessage(menuItems.ok),
@@ -1301,7 +1303,7 @@ class FranzMenu implements StoresProps {
   debugMenu(): MenuItemConstructorOptions[] {
     const { intl } = window['ferdium'];
 
-    return [
+    const items: MenuItemConstructorOptions[] = [
       {
         label: intl.formatMessage(menuItems.debugInfo),
         click: () => {
@@ -1317,14 +1319,20 @@ class FranzMenu implements StoresProps {
           });
         },
       },
-      {
+    ];
+
+    // Only offer publishing when the brand actually hosts a debug endpoint.
+    if (DEBUG_API) {
+      items.push({
         label: intl.formatMessage(menuItems.publishDebugInfo),
         click: () => {
           window['ferdium'].features.publishDebugInfo.state.isModalVisible =
             true;
         },
-      },
-    ];
+      });
+    }
+
+    return items;
   }
 
   _getServiceName(service) {

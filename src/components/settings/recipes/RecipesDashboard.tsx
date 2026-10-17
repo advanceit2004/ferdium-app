@@ -119,7 +119,7 @@ interface IProps extends WithStylesProps<typeof styles>, WrappedComponentProps {
   recipeFilter?: string;
   recipeDirectory: string;
   openRecipeDirectory: () => void;
-  openDevDocs: () => void;
+  openDevDocs?: () => void;
 }
 
 interface IState {
@@ -240,11 +240,13 @@ class RecipesDashboard extends Component<IProps, IState> {
                         buttonType="secondary"
                         label={intl.formatMessage(messages.openFolder)}
                       />
-                      <Button
-                        onClick={openDevDocs}
-                        buttonType="secondary"
-                        label={intl.formatMessage(messages.openDevDocs)}
-                      />
+                      {openDevDocs && (
+                        <Button
+                          onClick={openDevDocs}
+                          buttonType="secondary"
+                          label={intl.formatMessage(messages.openDevDocs)}
+                        />
+                      )}
                     </div>
                   </div>
                 </>

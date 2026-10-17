@@ -10,6 +10,7 @@ import {
 } from 'react-intl';
 import withStyles, { type WithStylesProps } from 'react-jss';
 import { Tooltip as ReactTooltip } from 'react-tooltip';
+import { BRAND } from '../../../brand.generated';
 import { DEFAULT_LOADER_COLOR, LIVE_FRANZ_API } from '../../../config';
 import Infobox from '../../ui/Infobox';
 import Button from '../../ui/button';
@@ -164,7 +165,7 @@ class TeamDashboard extends Component<IProps> {
                 <img
                   className={classes.image}
                   src="https://cdn.franzinfra.com/announcements/assets/teams.png"
-                  alt="Ferdium for Teams"
+                  alt={`${BRAND.appName} for Teams`}
                 />
               </div>
               <div className={classes.buttonContainer}>

@@ -2,6 +2,7 @@ import Markdown from 'markdown-to-jsx';
 import { observer } from 'mobx-react';
 import { Component } from 'react';
 import { type IntlShape, defineMessages, injectIntl } from 'react-intl';
+import { BRAND } from '../../../brand.generated';
 import { ferdiumVersion } from '../../../environment-remote';
 import {
   getFerdiumVersion,
@@ -68,7 +69,8 @@ class ReleaseNotesDashboard extends Component<IProps, IState> {
       <div className="settings__main">
         <div className="settings__header">
           <span className="settings__header-item">
-            Ferdium {getFerdiumVersion(window.location.href, ferdiumVersion)}{' '}
+            {BRAND.appName}{' '}
+            {getFerdiumVersion(window.location.href, ferdiumVersion)}{' '}
             {' | '}
           </span>
           <span className="settings__header-item__secondary">

@@ -5,6 +5,7 @@ import macosVersion from 'macos-version';
 // eslint-disable-next-line @typescript-eslint/prefer-ts-expect-error
 // @ts-ignore
 import { askForScreenCaptureAccess } from 'node-mac-permissions';
+import { BRAND } from '../brand.generated';
 import { userDataPath } from '../environment-remote';
 
 const debug = require('../preload-safe-debug')('Ferdium:macOSPermissions');
@@ -68,8 +69,7 @@ export const askFormacOSPermissions = async (
     const { response } = await dialog.showMessageBox(mainWindow, {
       type: 'info',
       message: 'Enable Screen Sharing',
-      detail:
-        'To enable screen sharing for some services, Ferdium needs the permission to record your screen.',
+      detail: `To enable screen sharing for some services, ${BRAND.appName} needs the permission to record your screen.`,
       buttons: ['Allow screen sharing', 'No', 'Ask me later'],
       defaultId: 0,
       cancelId: 2,

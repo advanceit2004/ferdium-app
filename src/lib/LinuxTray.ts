@@ -7,7 +7,7 @@ import { join } from 'node:path';
 
 import * as dbus from 'dbus-next';
 import type { MessageBus } from 'dbus-next';
-import { type NativeImage, nativeImage } from 'electron';
+import { BRAND } from '../brand.generated';
 
 const STATUS_NOTIFIER_ITEM_PATH = '/StatusNotifierItem';
 const DBUS_MENU_PATH = '/Menu';
@@ -108,11 +108,11 @@ class StatusNotifierItem extends dbus.interface.Interface {
   }
 
   get Id(): string {
-    return 'ferdium';
+    return BRAND.appSlug;
   }
 
   get Title(): string {
-    return 'Ferdium';
+    return BRAND.appName;
   }
 
   get Status(): string {
@@ -156,7 +156,7 @@ class StatusNotifierItem extends dbus.interface.Interface {
   }
 
   get ToolTip(): [string, unknown[], string, string] {
-    return ['', [], 'Ferdium', ''];
+    return ['', [], BRAND.appName, ''];
   }
 
   get ItemIsMenu(): boolean {

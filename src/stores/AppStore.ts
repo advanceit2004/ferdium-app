@@ -24,6 +24,7 @@ import { v4 as uuidV4 } from 'uuid';
 import type { Stores } from '../@types/stores.types';
 import type { Actions } from '../actions/lib/actions';
 import type { ApiInterface } from '../api';
+import { BRAND } from '../brand.generated';
 import { CHECK_INTERVAL, DEFAULT_APP_SETTINGS } from '../config';
 import {
   electronVersion,
@@ -59,7 +60,7 @@ const executablePath = isMac
     ? process.env.PORTABLE_EXECUTABLE_FILE
     : process.execPath;
 const autoLauncher = new AutoLaunch({
-  name: 'Ferdium',
+  name: BRAND.appName,
   path: executablePath,
 });
 
@@ -363,7 +364,7 @@ export default class AppStore extends TypedStore {
           'app.welcomeNotification.title',
           // `Welcome to Ferdium ${ferdiumVersion}`,
           // { version: ferdiumVersion },
-          `Welcome to Ferdium ${ferdiumVersion.split('.')[0]}`,
+          `Welcome to ${BRAND.appName} ${ferdiumVersion.split('.')[0]}`,
           { version: ferdiumVersion.split('.')[0] },
         ),
         {

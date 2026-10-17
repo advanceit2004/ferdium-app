@@ -1,4 +1,5 @@
 import translateGoogle from 'google-translate-api-x';
+import { BRAND } from '../brand.generated';
 import { LIVE_API_FERDIUM_LIBRETRANSLATE } from '../config';
 
 export async function translateTo(
@@ -8,7 +9,7 @@ export async function translateTo(
 ): Promise<{ text: string; error: boolean }> {
   const errorText =
     // TODO: Need to support i18n
-    'FERDIUM ERROR: An error occurred. Please select less text to translate or try again later.';
+    `${BRAND.appName.toUpperCase()} ERROR: An error occurred. Please select less text to translate or try again later.`;
 
   if (translatorEngine === 'Google') {
     const translationResult = await translateGoogle(text, {

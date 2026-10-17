@@ -11,6 +11,18 @@ import {
  */
 import { API_VERSION } from '../environment-remote';
 import { BRAND } from '../brand.generated';
+
+// Sentinels written into settings by older releases. `LOCAL_SERVER` is the
+// current spelling of the same concept, so all of them mean the same thing:
+// "this install talks to a bundled/local server rather than a remote one".
+// They must be kept verbatim for existing settings files to keep resolving.
+const LEGACY_NO_SERVER_SENTINELS = [
+  'You are using Ferdi without a server',
+  'You are using Ferdium without a server',
+];
+
+const isNoServerSentinel = (serverType: string): boolean =>
+  serverType === LOCAL_SERVER || LEGACY_NO_SERVER_SENTINELS.includes(serverType);
 import { fixUrl } from '../helpers/url-helpers';
 
 // Note: This cannot be used from the internal-server since we are not running within the context of a browser window
@@ -49,66 +61,17 @@ export const importExportURL = () => {
 
 export const serverBase = () => {
   const serverType = (window as any).ferdium.stores.settings.all.app.server;
-  const noServerFerdi = 'You are using Ferdi without a server';
-  const noServerFerdium = 'You are using Ferdium without a server';
-  const noServerBrand = `You are using ${
-    BRAND.appName ?? 'Ferdium'
-  } without a server`;
 
-  let terms;
-  switch (serverType) {
-    case LIVE_FRANZ_API: {
-      terms = DEV_API_FRANZ_WEBSITE;
-      break;
-    }
-    case noServerFerdi: {
-      terms = LIVE_FERDIUM_API;
-      break;
-    }
-    case noServerFerdium:
-    case noServerBrand: {
-      terms = LIVE_FERDIUM_API;
-      break;
-    }
-    default: {
-      terms = serverType;
-    }
-  }
-
-  return fixUrl(terms);
+  if (serverType === LIVE_FRANZ_API) return fixUrl(DEV_API_FRANZ_WEBSITE);
+  if (isNoServerSentinel(serverType)) return fixUrl(LIVE_FERDIUM_API);
+  return fixUrl(serverType);
 };
 
 export const serverName = (): string => {
   const serverType = (window as any).ferdium.stores.settings.all.app.server;
-  const noServerFerdi = 'You are using Ferdi without a server';
-  const noServerFerdium = 'You are using Ferdium without a server';
-  const noServerBrand = `You are using ${
-    BRAND.appName ?? 'Ferdium'
-  } without a server`;
 
-  let nameServer;
-  switch (serverType) {
-    case LIVE_FRANZ_API: {
-      nameServer = 'Franz';
-      break;
-    }
-    case LIVE_FERDIUM_API: {
-      nameServer = BRAND.appName ?? 'Ferdium';
-      break;
-    }
-    case noServerFerdi: {
-      nameServer = 'No';
-      break;
-    }
-    case noServerFerdium:
-    case noServerBrand: {
-      nameServer = 'No';
-      break;
-    }
-    default: {
-      nameServer = 'Custom';
-    }
-  }
-
-  return nameServer;
+  if (serverType === LIVE_FRANZ_API) return 'Franz';
+  if (serverType === LIVE_FERDIUM_API) return BRAND.appName;
+  if (isNoServerSentinel(serverType)) return 'No';
+  return 'Custom';
 };

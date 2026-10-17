@@ -1,6 +1,8 @@
 import { Octokit } from '@octokit/core';
 import { type IntlShape, defineMessages } from 'react-intl';
 
+import { BRAND } from '../brand.generated';
+
 export const getFerdiumVersion = (
   currentLocation: string,
   ferdiumVersion: string,
@@ -48,8 +50,8 @@ export async function getUpdateInfoFromGH(
     const response = await octokit.request(
       'GET /repos/{owner}/{repo}/releases/tags/{tag}',
       {
-        owner: 'ferdium',
-        repo: 'ferdium-app',
+        owner: BRAND.github.owner,
+        repo: BRAND.github.repo,
         tag: getFerdiumVersion(currentLocation, ferdiumVersion),
       },
     );
