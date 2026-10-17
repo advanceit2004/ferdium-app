@@ -45,7 +45,8 @@ const SCAN_EXTENSIONS = new Set([
 const SKIP_DIRS = new Set(['node_modules', '.git', 'dist', 'dist-electron', 'build', '.cache', 'coverage']);
 // Locale files are handled separately (values only, and covered at runtime).
 const LOCALE_DIR = path.join('src', 'i18n', 'locales');
-const DEFAULT_MESSAGES = path.join('src', 'i18n', 'defaultMessages.json');
+// Flat fallback map in the locales folder; rewritten by `pnpm brand:apply`.
+const DEFAULT_MESSAGES = path.join(LOCALE_DIR, 'defaultMessages.json');
 // Stale `babel-plugin-react-intl` extraction output; not loaded at runtime.
 const MESSAGES_DIR = path.join('src', 'i18n', 'messages');
 
@@ -58,6 +59,7 @@ const APPLY_BRAND_MANAGED_FILES = [
   'src/index.html',
   'src/dev-app-update.yml',
   'src/brand.generated.ts',
+  'src/i18n/locales/defaultMessages.json',
 ].map(rel => rel.split('/').join(path.sep));
 const APPLY_BRAND_MANAGED_DIRS = [path.join('src', 'internal-server')];
 const isApplyBrandManaged = rel =>
@@ -112,13 +114,31 @@ for (const token of Object.keys(brand.legacy.tokens)) matchers.push(new RegExp(e
 
 const matchesBrand = value => matchers.some(m => m.test(value));
 
+// The brand's own identifiers are not upstream branding even when they contain a
+// legacy token - a fork is commonly named `ferdium-app`. A brand that points at
+// the upstream repo or owner verbatim is still flagged.
+const legacyValues = new Set(
+  [
+    ...brand.legacy.names,
+    ...brand.legacy.githubOwners,
+    ...brand.legacy.domains,
+    ...Object.keys(brand.legacy.tokens),
+  ].map(value => value.toLowerCase()),
+);
+const brandOwnPatterns = [brand.appName, brand.appSlug, brand.github?.repo]
+  .filter(value => typeof value === 'string' && value.length > 3)
+  .filter(value => !legacyValues.has(value.toLowerCase()))
+  .map(value => new RegExp(escapeRegExp(value), 'gi'));
+
 // Comments, dev logging and other non-rendered lines are skipped wholesale.
 const isWholeLineSkipped = line => allowlist.wholeLine.some(p => p.test(line));
 
-// Everything else is allowlisted token-by-token: neutralize the known-internal
-// substrings and re-test, so a genuine leak elsewhere on the line still fails.
+// Everything else is allowlisted token-by-token: neutralize the brand-owned and
+// known-internal substrings and re-test, so a genuine leak elsewhere on the same
+// line still fails.
 const stripAllowlistedTokens = line => {
   let residual = line;
+  for (const pattern of brandOwnPatterns) residual = residual.replace(pattern, ' ');
   for (const pattern of allowlist.token) residual = residual.replace(pattern, ' ');
   return residual;
 };
@@ -277,6 +297,7 @@ function scanLocaleValues() {
   if (!fs.existsSync(dir)) return;
   for (const entry of fs.readdirSync(dir)) {
     if (!entry.endsWith('.json')) continue;
+    if (path.join(LOCALE_DIR, entry) === DEFAULT_MESSAGES) continue;
     let data;
     try {
       data = JSON.parse(fs.readFileSync(path.join(dir, entry), 'utf8'));
@@ -296,6 +317,15 @@ function scanLocaleValues() {
   }
 }
 scanLocaleValues();
+
+// `defaultMessages.json` is a fallback map that `pnpm brand:apply` rewrites, so
+// surface it as APPLIED instead of inflating the runtime-covered count.
+if (fs.existsSync(path.join(root, DEFAULT_MESSAGES))) {
+  const hits = read(DEFAULT_MESSAGES)
+    .split(/\r?\n/)
+    .filter(line => matchesBrand(line)).length;
+  if (hits) addManaged(DEFAULT_MESSAGES, 0, `branded fallback messages x${hits}`);
+}
 
 // --- hard metadata assertions ---------------------------------------------
 if (!brand.isDefaultFerdium) {

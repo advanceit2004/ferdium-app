@@ -165,17 +165,15 @@ function rewriteJsonValues(file, replacements) {
 // Rewrite brand tokens in locale *values* (never keys) at build time. This keeps
 // the committed locale files untouched (so upstream merges stay clean) while
 // producing fully branded bundles; the runtime sanitizer is the second safety net.
+// `src/i18n/locales/defaultMessages.json` sits in the same folder and is covered too.
 function rewriteLocales() {
-  const i18nDir = path.join(root, 'src', 'i18n');
+  const localesDir = path.join(root, 'src', 'i18n', 'locales');
   const files = [];
-  const localesDir = path.join(i18nDir, 'locales');
   if (fs.existsSync(localesDir)) {
     for (const entry of fs.readdirSync(localesDir)) {
       if (entry.endsWith('.json')) files.push(path.join(localesDir, entry));
     }
   }
-  const defaultMessages = path.join(i18nDir, 'defaultMessages.json');
-  if (fs.existsSync(defaultMessages)) files.push(defaultMessages);
 
   let touched = 0;
   for (const file of files) {
@@ -222,7 +220,8 @@ if (brand.github?.owner && brand.github?.repo) {
 }
 pkg.copyright = brand.copyright ?? brand.appId.split('.').slice(0, 2).join('.');
 if (pkg.scripts?.debug) {
-  pkg.scripts.debug = pkg.scripts.debug.replace(/DEBUG=Ferdium:\*/g, `DEBUG=${brand.appName}:*`);
+  // DEBUG namespaces cannot contain spaces, so use the slug here.
+  pkg.scripts.debug = pkg.scripts.debug.replace(/DEBUG=Ferdium:\*/g, `DEBUG=${brand.appSlug}:*`);
 }
 writeJson(packagePath, pkg);
 
@@ -303,7 +302,9 @@ replaceInFile(
   [
     [/firstname: '[^']*'/, `firstname: ${jsString(brand.appName)}`],
     [/username: '[^']*'/, `username: ${jsString(brand.appName)}`],
-    [/mail: '[^']*'/, `mail: ${jsString(`internal@${brand.appSlug}.local`)}`],
+    // Covers both the `email:` and `mail:` fields. A bare `mail: '[^']*'` pattern
+    // also matches inside `email:` and would only rewrite the first of the two.
+    [/internal@ferdium\.org/g, `internal@${brand.appSlug}.local`],
     [
       /'Your account has been imported\. You can now use your Franz account in [^']*\.'/,
       `'Your account has been imported. You can now use your Franz account in ${brand.appName}.'`,
