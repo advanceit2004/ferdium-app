@@ -206,21 +206,58 @@ const packagePath = path.join(root, 'package.json');
 const pkg = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
 const metadataPath = path.join(root, 'build-helpers', 'brand-build.json');
 
+function readPreviousBuild() {
+  if (!fs.existsSync(metadataPath)) return null;
+  try {
+    return JSON.parse(fs.readFileSync(metadataPath, 'utf8'));
+  } catch {
+    return null;
+  }
+}
+
+const previousBuild = readPreviousBuild();
+
+/** Upstream prerelease tags that must survive the fallback strip below. */
+const UPSTREAM_PRERELEASE =
+  /-(?:alpha|beta|rc|nightly|dev|canary|next|pre)(?:\.[0-9]+)?$/i;
+
+/**
+ * Version suffixes this brand - or the brand applied previously - may have
+ * appended, longest first. Used to peel a branded version back to its upstream
+ * base, e.g. `7.2.3-office-web-access.1` -> `7.2.3`.
+ */
+function knownVersionSuffixes() {
+  const suffixes = [brand.versionSuffix, previousBuild?.versionSuffix];
+  for (const slug of [brand.appSlug, previousBuild?.appSlug]) {
+    if (slug) suffixes.push(`${slug}.1`);
+  }
+  return [...new Set(suffixes.filter(Boolean))].sort(
+    (a, b) => b.length - a.length,
+  );
+}
+
 // Recover the pristine upstream version so repeated `brand:apply` runs stay
 // idempotent even when the brand uses a custom version suffix.
 function resolveUpstreamVersion() {
-  if (fs.existsSync(metadataPath)) {
-    try {
-      const previous = JSON.parse(fs.readFileSync(metadataPath, 'utf8'));
-      if (previous.upstreamVersion) return previous.upstreamVersion;
-    } catch {
-      // fall through to the suffix heuristic below
+  // The recorded upstream version is only trustworthy while the tree still
+  // carries the exact branded version it describes. After an upstream rebase
+  // `package.json` holds a new version and must win over the stale metadata.
+  if (previousBuild?.upstreamVersion && previousBuild.version === pkg.version) {
+    return previousBuild.upstreamVersion;
+  }
+  for (const suffix of knownVersionSuffixes()) {
+    const tail = `-${suffix}`;
+    if (pkg.version.endsWith(tail)) {
+      return pkg.version.slice(0, -tail.length);
     }
   }
-  return pkg.version.replace(
-    new RegExp(`-${escapeRegExp(brand.appSlug)}(\\.[0-9]+)?$`),
-    '',
-  );
+  // Last resort: the tree was branded by a run whose metadata is gone, so peel
+  // off any trailing `<slug>.<number>` - unless it is an upstream prerelease
+  // tag, which is part of the base version and must be preserved.
+  if (!UPSTREAM_PRERELEASE.test(pkg.version)) {
+    return pkg.version.replace(/-[A-Za-z0-9-]+\.[0-9]+$/, '');
+  }
+  return pkg.version;
 }
 
 const upstreamVersion = resolveUpstreamVersion();
@@ -296,8 +333,10 @@ replaceInFile(eb, [
   ],
   [/publisherName: \[.*\]/g, `publisherName: ["${brand.publisherName}"]`],
   [
-    /unpackDirName: "Ferdium-Unpacked"/g,
-    `unpackDirName: "${brand.appName}-Unpacked"`,
+    // Brand-agnostic so re-running with a different brand cannot leave a stale
+    // directory name behind.
+    /unpackDirName: "[^"]*-Unpacked"/g,
+    `unpackDirName: "${brand.appSlug}-Unpacked"`,
   ],
 ]);
 
