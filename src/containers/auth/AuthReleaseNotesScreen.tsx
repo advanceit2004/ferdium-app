@@ -4,8 +4,8 @@ import { Component } from 'react';
 import { mdiArrowLeftCircle } from '@mdi/js';
 import Markdown from 'markdown-to-jsx';
 import { type IntlShape, defineMessages, injectIntl } from 'react-intl';
-import Icon from '../../components/ui/icon';
 import { BRAND } from '../../brand.generated';
+import Icon from '../../components/ui/icon';
 import { ferdiumVersion } from '../../environment-remote';
 import {
   getFerdiumVersion,
@@ -77,8 +77,7 @@ class AuthReleaseNotesScreen extends Component<IProps, IState> {
           <div className="auth__header">
             <span className="auth__header-item">
               {BRAND.appName}{' '}
-              {getFerdiumVersion(window.location.href, ferdiumVersion)}{' '}
-              {' | '}
+              {getFerdiumVersion(window.location.href, ferdiumVersion)} {' | '}
             </span>
             <span className="auth__header-item__secondary">
               {intl.formatMessage(messages.headline)}

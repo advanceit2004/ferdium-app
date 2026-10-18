@@ -7,6 +7,8 @@ import { join } from 'node:path';
 
 import * as dbus from 'dbus-next';
 import type { MessageBus } from 'dbus-next';
+import { type NativeImage, nativeImage } from 'electron';
+
 import { BRAND } from '../brand.generated';
 
 const STATUS_NOTIFIER_ITEM_PATH = '/StatusNotifierItem';

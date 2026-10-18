@@ -22,8 +22,9 @@ export const LOCAL_API = 'http://localhost:3000';
 export const DEV_FRANZ_API = 'https://dev.franzinfra.com';
 
 // Brand-provided remote API. `'local'` (or an empty value) selects the bundled
-// internal server instead of a hosted one.
-const BRAND_API_URL = BRAND.api?.defaultServerUrl;
+// internal server instead of a hosted one. Typed as `string` because the default
+// brand module narrows this to a string literal with `as const`.
+const BRAND_API_URL: string | undefined = BRAND.api?.defaultServerUrl;
 export const LIVE_FERDIUM_API =
   BRAND_API_URL && BRAND_API_URL !== 'local' ? BRAND_API_URL : LOCAL_SERVER;
 export const LIVE_FRANZ_API = 'https://api.franzinfra.com';
@@ -295,8 +296,7 @@ export const SEARCH_ENGINE_NAMES = {
 export const TRANSLATOR_ENGINE_GOOGLE = 'Google';
 export const TRANSLATOR_ENGINE_LIBRETRANSLATE = 'LibreTranslate';
 export const TRANSLATOR_ENGINE_NAMES = {
-  [TRANSLATOR_ENGINE_LIBRETRANSLATE]:
-    `${BRAND.appName} Translator (Powered by LibreTranslate)`,
+  [TRANSLATOR_ENGINE_LIBRETRANSLATE]: `${BRAND.appName} Translator (Powered by LibreTranslate)`,
   [TRANSLATOR_ENGINE_GOOGLE]: 'Google',
 };
 

@@ -5,7 +5,8 @@ export const BRAND = {
   appSlug: 'ferdium',
   appId: 'org.ferdium.ferdium-app',
   protocol: 'ferdium',
-  description: 'Messaging app for WhatsApp, Slack, Telegram, Hangouts and many many more.',
+  description:
+    'Messaging app for WhatsApp, Slack, Telegram, Hangouts and many many more.',
   website: 'https://ferdium.org',
   supportEmail: 'hello@ferdium.org',
   privacyUrl: 'https://ferdium.org/privacy',

@@ -1,4 +1,5 @@
 import { join } from 'node:path';
+import { BRAND } from './brand.generated';
 import {
   DEV_API_FRANZ_WEBSITE,
   DEV_FRANZ_API,
@@ -10,7 +11,6 @@ import {
   LOCAL_API_WEBSITE,
   LOCAL_WS_API,
 } from './config';
-import { BRAND } from './brand.generated';
 import { api as electronApi } from './electron-util';
 import { isWindows } from './environment';
 

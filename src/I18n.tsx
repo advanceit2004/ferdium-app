@@ -1,5 +1,5 @@
 import { inject, observer } from 'mobx-react';
-import { useCallback, useEffect, type ReactNode } from 'react';
+import { type ReactNode, useCallback, useEffect } from 'react';
 import type { IntlShape } from 'react-intl';
 
 import BrandIntlProvider from './i18n/brand-intl';
@@ -24,6 +24,9 @@ const I18N = ({ stores, children }: Props) => {
     window['ferdium'].intl = intl;
   }, []);
 
+  // The menu labels are translated, so the menu has to be rebuilt every time the
+  // locale changes even though the effect body does not read `locale` itself.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: locale is used as the rebuild trigger
   useEffect(() => {
     window['ferdium'].menu.rebuild();
   }, [locale]);

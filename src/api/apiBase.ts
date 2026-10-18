@@ -1,3 +1,4 @@
+import { BRAND } from '../brand.generated';
 import {
   DEV_API_FRANZ_WEBSITE,
   LIVE_FERDIUM_API,
@@ -10,20 +11,19 @@ import {
  * Get API base URL from store
  */
 import { API_VERSION } from '../environment-remote';
-import { BRAND } from '../brand.generated';
+import { fixUrl } from '../helpers/url-helpers';
 
 // Sentinels written into settings by older releases. `LOCAL_SERVER` is the
 // current spelling of the same concept, so all of them mean the same thing:
 // "this install talks to a bundled/local server rather than a remote one".
 // They must be kept verbatim for existing settings files to keep resolving.
-const LEGACY_NO_SERVER_SENTINELS = [
+const LEGACY_NO_SERVER_SENTINELS = new Set([
   'You are using Ferdi without a server',
   'You are using Ferdium without a server',
-];
+]);
 
 const isNoServerSentinel = (serverType: string): boolean =>
-  serverType === LOCAL_SERVER || LEGACY_NO_SERVER_SENTINELS.includes(serverType);
-import { fixUrl } from '../helpers/url-helpers';
+  serverType === LOCAL_SERVER || LEGACY_NO_SERVER_SENTINELS.has(serverType);
 
 // Note: This cannot be used from the internal-server since we are not running within the context of a browser window
 export default function apiBase(withVersion = true) {

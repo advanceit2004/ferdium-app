@@ -53,7 +53,7 @@ const legacy: Required<LegacyConfig> = {
 };
 
 function escapeRegExp(value: string): string {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return value.replaceAll(/[$()*+.?[\\\]^{|}]/g, '\\$&');
 }
 
 function websiteHost(): string {
@@ -71,8 +71,12 @@ export function buildBrandReplacers(): Replacer[] {
 
   // 1) Explicit overrides (e.g. "@FerdiumMessenger" -> "@mysocialhandle").
   for (const [from, to] of Object.entries(legacy.tokens)) {
-    if (!from) continue;
-    replacers.push({ pattern: new RegExp(escapeRegExp(from), 'g'), replacement: to });
+    if (from) {
+      replacers.push({
+        pattern: new RegExp(escapeRegExp(from), 'g'),
+        replacement: to,
+      });
+    }
   }
 
   // 2) Support/contact e-mail addresses (before bare domains).
@@ -86,8 +90,13 @@ export function buildBrandReplacers(): Replacer[] {
   }
 
   // 3) Website domains. Longest first so "www.ferdium.org" is consumed as a whole.
-  for (const domain of [...legacy.domains].sort((a, b) => b.length - a.length)) {
-    replacers.push({ pattern: new RegExp(escapeRegExp(domain), 'gi'), replacement: host });
+  for (const domain of [...legacy.domains].sort(
+    (a, b) => b.length - a.length,
+  )) {
+    replacers.push({
+      pattern: new RegExp(escapeRegExp(domain), 'gi'),
+      replacement: host,
+    });
   }
 
   // 4) GitHub org paths: github.com/ferdium -> github.com/<owner>.
@@ -103,11 +112,12 @@ export function buildBrandReplacers(): Replacer[] {
   // 5) Brand name last, so it also covers inflected/compound forms in other
   //    languages ("Ferdium-Konto", "Ferdiumn", "Ferdiuma", ...).
   for (const name of legacy.names) {
-    if (!name) continue;
-    replacers.push({
-      pattern: new RegExp(escapeRegExp(name), 'gi'),
-      replacement: String(BRAND.appName),
-    });
+    if (name) {
+      replacers.push({
+        pattern: new RegExp(escapeRegExp(name), 'gi'),
+        replacement: String(BRAND.appName),
+      });
+    }
   }
 
   return replacers.filter(replacer => replacer.replacement !== '');
@@ -126,14 +136,19 @@ export function sanitizeBrandText(text: string): string {
 }
 
 /** Replace upstream brand tokens in every string value of a (possibly nested) dictionary. */
-export function sanitizeTranslationDictionary<T extends Record<string, unknown>>(dictionary: T): T {
+export function sanitizeTranslationDictionary<
+  T extends Record<string, unknown>,
+>(dictionary: T): T {
   if (!dictionary || replacers.length === 0) return dictionary;
+  const sanitized: Record<string, unknown> = { ...dictionary };
   for (const [key, value] of Object.entries(dictionary)) {
     if (typeof value === 'string') {
-      (dictionary as Record<string, unknown>)[key] = sanitizeBrandText(value);
+      sanitized[key] = sanitizeBrandText(value);
     } else if (value && typeof value === 'object') {
-      sanitizeTranslationDictionary(value as Record<string, unknown>);
+      sanitized[key] = sanitizeTranslationDictionary(
+        value as Record<string, unknown>,
+      );
     }
   }
-  return dictionary;
+  return sanitized as T;
 }
