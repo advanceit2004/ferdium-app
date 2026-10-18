@@ -40,9 +40,27 @@ const ROOT_FILES = ['package.json', 'electron-builder.yml'].map(rel =>
   rel.split('/').join(path.sep),
 );
 const SCAN_EXTENSIONS = new Set([
-  '.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs', '.edge', '.html', '.json', '.yml', '.yaml',
+  '.ts',
+  '.tsx',
+  '.js',
+  '.jsx',
+  '.mjs',
+  '.cjs',
+  '.edge',
+  '.html',
+  '.json',
+  '.yml',
+  '.yaml',
 ]);
-const SKIP_DIRS = new Set(['node_modules', '.git', 'dist', 'dist-electron', 'build', '.cache', 'coverage']);
+const SKIP_DIRS = new Set([
+  'node_modules',
+  '.git',
+  'dist',
+  'dist-electron',
+  'build',
+  '.cache',
+  'coverage',
+]);
 // Locale files are handled separately (values only, and covered at runtime).
 const LOCALE_DIR = path.join('src', 'i18n', 'locales');
 // Flat fallback map in the locales folder; rewritten by `pnpm brand:apply`.
@@ -77,14 +95,18 @@ function loadBrand() {
   const start = text.indexOf('{');
   const endMarker = '} as const';
   const end = text.lastIndexOf(endMarker);
-  const literal = text.slice(start, (end === -1 ? text.lastIndexOf('}') : end) + 1);
+  const literal = text.slice(
+    start,
+    (end === -1 ? text.lastIndexOf('}') : end) + 1,
+  );
   // eslint-disable-next-line no-new-func
   const brand = new Function(`return (${literal});`)();
   const legacy = { ...DEFAULT_LEGACY, ...(brand.legacy ?? {}) };
   return {
     ...brand,
     legacy,
-    isDefaultFerdium: brand.appName === 'Ferdium' || brand.appSlug === 'ferdium',
+    isDefaultFerdium:
+      brand.appName === 'Ferdium' || brand.appSlug === 'ferdium',
   };
 }
 
@@ -105,12 +127,15 @@ const allowlist = loadAllowlist();
 
 // Matchers that indicate the upstream brand is present.
 const matchers = [];
-for (const name of brand.legacy.names) matchers.push(new RegExp(escapeRegExp(name), 'i'));
-for (const domain of brand.legacy.domains) matchers.push(new RegExp(escapeRegExp(domain), 'i'));
+for (const name of brand.legacy.names)
+  matchers.push(new RegExp(escapeRegExp(name), 'i'));
+for (const domain of brand.legacy.domains)
+  matchers.push(new RegExp(escapeRegExp(domain), 'i'));
 for (const owner of brand.legacy.githubOwners) {
   matchers.push(new RegExp(`github\\.com/${escapeRegExp(owner)}`, 'i'));
 }
-for (const token of Object.keys(brand.legacy.tokens)) matchers.push(new RegExp(escapeRegExp(token), 'i'));
+for (const token of Object.keys(brand.legacy.tokens))
+  matchers.push(new RegExp(escapeRegExp(token), 'i'));
 
 const matchesBrand = value => matchers.some(m => m.test(value));
 
@@ -138,8 +163,10 @@ const isWholeLineSkipped = line => allowlist.wholeLine.some(p => p.test(line));
 // line still fails.
 const stripAllowlistedTokens = line => {
   let residual = line;
-  for (const pattern of brandOwnPatterns) residual = residual.replace(pattern, ' ');
-  for (const pattern of allowlist.token) residual = residual.replace(pattern, ' ');
+  for (const pattern of brandOwnPatterns)
+    residual = residual.replace(pattern, ' ');
+  for (const pattern of allowlist.token)
+    residual = residual.replace(pattern, ' ');
   return residual;
 };
 
@@ -151,17 +178,23 @@ let scannedFiles = 0;
 
 const addFailure = (file, line, text, residual) =>
   failures.push({ file, line, text, residual: residual?.trim() });
-const addCovered = (file, line, text, kind) => covered.push({ file, line, text, kind });
+const addCovered = (file, line, text, kind) =>
+  covered.push({ file, line, text, kind });
 const addManaged = (file, line, text) => managed.push({ file, line, text });
 
 function walk(dir, out = []) {
-  for (const entry of fs.readdirSync(path.join(root, dir), { withFileTypes: true })) {
+  for (const entry of fs.readdirSync(path.join(root, dir), {
+    withFileTypes: true,
+  })) {
     const rel = path.join(dir, entry.name);
     if (entry.isDirectory()) {
       if (SKIP_DIRS.has(entry.name)) continue;
       if (rel === LOCALE_DIR || rel === MESSAGES_DIR) continue;
       walk(rel, out);
-    } else if (SCAN_EXTENSIONS.has(path.extname(entry.name)) && rel !== DEFAULT_MESSAGES) {
+    } else if (
+      SCAN_EXTENSIONS.has(path.extname(entry.name)) &&
+      rel !== DEFAULT_MESSAGES
+    ) {
       out.push(rel);
     }
   }
@@ -213,9 +246,9 @@ function stripCoveredLiterals(source) {
     return j + 1;
   };
 
-  let match;
-  const dm = /\bdefaultMessage\s*:\s*/g;
-  while ((match = dm.exec(source))) blankLiteralAt(dm.lastIndex);
+  for (const match of source.matchAll(/\bdefaultMessage\s*:\s*/g)) {
+    blankLiteralAt((match.index ?? 0) + match[0].length);
+  }
 
   for (const name of COVERED_CALLS) {
     let from = 0;
@@ -266,7 +299,8 @@ function scanSourceFile(rel) {
   }
 
   const { stripped, covered: coveredCount } = stripCoveredLiterals(source);
-  if (coveredCount) addCovered(rel, 0, '', `intl defaultMessage x${coveredCount}`);
+  if (coveredCount)
+    addCovered(rel, 0, '', `intl defaultMessage x${coveredCount}`);
   stripped.split(/\r?\n/).forEach((line, index) => {
     if (!matchesBrand(line)) return;
     if (isWholeLineSkipped(line)) {
@@ -307,7 +341,13 @@ function scanLocaleValues() {
     const visit = (node, keyPath) => {
       for (const [key, value] of Object.entries(node)) {
         if (typeof value === 'string') {
-          if (matchesBrand(value)) addCovered(path.join(LOCALE_DIR, entry), keyPath.concat(key).join('.'), '', 'locale value');
+          if (matchesBrand(value))
+            addCovered(
+              path.join(LOCALE_DIR, entry),
+              keyPath.concat(key).join('.'),
+              '',
+              'locale value',
+            );
         } else if (value && typeof value === 'object') {
           visit(value, keyPath.concat(key));
         }
@@ -324,36 +364,71 @@ if (fs.existsSync(path.join(root, DEFAULT_MESSAGES))) {
   const hits = read(DEFAULT_MESSAGES)
     .split(/\r?\n/)
     .filter(line => matchesBrand(line)).length;
-  if (hits) addManaged(DEFAULT_MESSAGES, 0, `branded fallback messages x${hits}`);
+  if (hits)
+    addManaged(DEFAULT_MESSAGES, 0, `branded fallback messages x${hits}`);
 }
 
 // --- hard metadata assertions ---------------------------------------------
 if (!brand.isDefaultFerdium) {
   const assertIncludes = (file, needle, label) => {
     if (!fs.existsSync(path.join(root, file))) return;
-    if (!read(file).includes(needle)) addFailure(file, 0, `missing ${label}: ${needle}`);
+    if (!read(file).includes(needle))
+      addFailure(file, 0, `missing ${label}: ${needle}`);
   };
   const assertNotIncludes = (file, needle, label) => {
     if (!fs.existsSync(path.join(root, file))) return;
-    if (read(file).includes(needle)) addFailure(file, 0, `still contains ${label}: ${needle}`);
+    if (read(file).includes(needle))
+      addFailure(file, 0, `still contains ${label}: ${needle}`);
   };
 
-  assertIncludes('package.json', `"productName": "${brand.appName}"`, 'productName');
+  assertIncludes(
+    'package.json',
+    `"productName": "${brand.appName}"`,
+    'productName',
+  );
   assertIncludes('package.json', `"name": "${brand.appSlug}"`, 'package name');
-  assertIncludes('electron-builder.yml', `appId: "${brand.appId}"`, 'electron appId');
-  assertIncludes('electron-builder.yml', `schemes: [${brand.protocol}]`, 'protocol scheme');
-  assertIncludes('src/index.html', `<title>${brand.appName}</title>`, 'HTML title');
+  assertIncludes(
+    'electron-builder.yml',
+    `appId: "${brand.appId}"`,
+    'electron appId',
+  );
+  assertIncludes(
+    'electron-builder.yml',
+    `schemes: [${brand.protocol}]`,
+    'protocol scheme',
+  );
+  assertIncludes(
+    'src/index.html',
+    `<title>${brand.appName}</title>`,
+    'HTML title',
+  );
 
-  assertNotIncludes('package.json', '"productName": "Ferdium"', 'upstream productName');
-  assertNotIncludes('electron-builder.yml', 'appId: "org.ferdium.ferdium-app"', 'upstream appId');
-  assertNotIncludes('src/index.html', '<title>Ferdium</title>', 'upstream HTML title');
+  assertNotIncludes(
+    'package.json',
+    '"productName": "Ferdium"',
+    'upstream productName',
+  );
+  assertNotIncludes(
+    'electron-builder.yml',
+    'appId: "org.ferdium.ferdium-app"',
+    'upstream appId',
+  );
+  assertNotIncludes(
+    'src/index.html',
+    '<title>Ferdium</title>',
+    'upstream HTML title',
+  );
 }
 
 // --- runtime sanitizer must be wired --------------------------------------
 function assertSanitizerWired() {
   const sanitizer = path.join(root, 'src', 'i18n', 'brand-i18n.ts');
   if (!fs.existsSync(sanitizer)) {
-    addFailure('src/i18n/brand-i18n.ts', 0, 'runtime brand sanitizer is missing');
+    addFailure(
+      'src/i18n/brand-i18n.ts',
+      0,
+      'runtime brand sanitizer is missing',
+    );
     return;
   }
   const expected = [
@@ -378,35 +453,58 @@ const groupBy = list =>
 
 if (asJson) {
   console.log(
-    JSON.stringify({ brand: brand.appName, failures, covered, managed, skipped, scannedFiles }, null, 2),
+    JSON.stringify(
+      {
+        brand: brand.appName,
+        failures,
+        covered,
+        managed,
+        skipped,
+        scannedFiles,
+      },
+      null,
+      2,
+    ),
   );
 } else if (reportOnly) {
   console.log(`Brand audit for ${brand.appName} (${brand.appSlug})`);
-  console.log(`  files scanned: ${scannedFiles} (skipped ${skipped} allowlisted lines/files)`);
+  console.log(
+    `  files scanned: ${scannedFiles} (skipped ${skipped} allowlisted lines/files)`,
+  );
   console.log(`  user-visible leaks: ${failures.length}`);
   console.log(`  covered at runtime: ${covered.length}`);
   console.log(`  rewritten by brand:apply: ${managed.length}`);
   const coveredGroups = groupBy(covered);
-  for (const [file, count] of Object.entries(coveredGroups).sort((a, b) => b[1] - a[1]).slice(0, 20)) {
+  for (const [file, count] of Object.entries(coveredGroups)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 20)) {
     console.log(`    COVERED ${count}  ${file}`);
   }
   const failureGroups = groupBy(failures);
-  for (const [file, count] of Object.entries(failureGroups).sort((a, b) => b[1] - a[1])) {
+  for (const [file, count] of Object.entries(failureGroups).sort(
+    (a, b) => b[1] - a[1],
+  )) {
     console.log(`    LEAK    ${count}  ${file}`);
   }
   const managedGroups = groupBy(managed);
-  for (const [file, count] of Object.entries(managedGroups).sort((a, b) => b[1] - a[1])) {
+  for (const [file, count] of Object.entries(managedGroups).sort(
+    (a, b) => b[1] - a[1],
+  )) {
     console.log(`    APPLIED ${count}  ${file}`);
   }
 } else {
   for (const { file, line, text, residual } of failures) {
     console.error(`FAIL ${file}${line ? `:${line}` : ''}: ${text}`);
-    if (process.env.BRAND_CHECK_DEBUG && residual) console.error(`     residual: ${residual}`);
+    if (process.env.BRAND_CHECK_DEBUG && residual)
+      console.error(`     residual: ${residual}`);
   }
   for (const item of covered.slice(0, 200)) {
-    console.log(`INFO ${item.file}${item.line ? `:${item.line}` : ''} (${item.kind})`);
+    console.log(
+      `INFO ${item.file}${item.line ? `:${item.line}` : ''} (${item.kind})`,
+    );
   }
-  if (covered.length > 200) console.log(`INFO ...and ${covered.length - 200} more covered strings`);
+  if (covered.length > 200)
+    console.log(`INFO ...and ${covered.length - 200} more covered strings`);
 }
 
 if (reportOnly || asJson) process.exit(0);
@@ -423,7 +521,9 @@ if (brand.isDefaultFerdium) {
 }
 
 if (failures.length) {
-  console.error(`\nBrand check failed (${failures.length} user-visible leaks, ${covered.length} covered).`);
+  console.error(
+    `\nBrand check failed (${failures.length} user-visible leaks, ${covered.length} covered).`,
+  );
   process.exit(1);
 }
 
@@ -432,5 +532,7 @@ console.log(
     `${covered.length} strings neutralized at runtime.`,
 );
 if (strict && covered.length) {
-  console.log(`Note: ${covered.length} strings rely on the runtime sanitizer (see \`--report\`).`);
+  console.log(
+    `Note: ${covered.length} strings rely on the runtime sanitizer (see \`--report\`).`,
+  );
 }

@@ -6,7 +6,9 @@ const root = process.cwd();
 const brandDirArg = process.argv[2];
 if (!brandDirArg) {
   console.error('Usage: pnpm brand:apply <path-to-brand-folder>');
-  console.error('Example: pnpm brand:apply ../whitelabel-branding/brands/example');
+  console.error(
+    'Example: pnpm brand:apply ../whitelabel-branding/brands/example',
+  );
   process.exit(1);
 }
 
@@ -20,10 +22,20 @@ if (!fs.existsSync(brandPath)) {
 const escapeRegExp = value => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 /** Quote a value as a single-quoted JavaScript string literal. */
-const jsString = value => `'${String(value).replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`;
+const jsString = value =>
+  `'${String(value).replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`;
 
 const rawBrand = JSON.parse(fs.readFileSync(brandPath, 'utf8'));
-const required = ['appName', 'appSlug', 'appId', 'protocol', 'website', 'supportEmail', 'accentColor', 'github'];
+const required = [
+  'appName',
+  'appSlug',
+  'appId',
+  'protocol',
+  'website',
+  'supportEmail',
+  'accentColor',
+  'github',
+];
 for (const key of required) {
   if (rawBrand[key] == null) {
     console.error(`brand.json missing required key: ${key}`);
@@ -32,7 +44,8 @@ for (const key of required) {
 }
 
 const brand = {
-  description: 'A white-label desktop workspace for messaging and collaboration services.',
+  description:
+    'A white-label desktop workspace for messaging and collaboration services.',
   privacyUrl: '',
   termsUrl: '',
   translationUrl: '',
@@ -110,10 +123,15 @@ function buildBrandReplacements() {
   }
   if (brand.supportEmail) {
     for (const domain of brand.legacy.domains) {
-      list.push([new RegExp(`[\\w.+-]+@${escapeRegExp(domain)}`, 'gi'), brand.supportEmail]);
+      list.push([
+        new RegExp(`[\\w.+-]+@${escapeRegExp(domain)}`, 'gi'),
+        brand.supportEmail,
+      ]);
     }
   }
-  for (const domain of [...brand.legacy.domains].sort((a, b) => b.length - a.length)) {
+  for (const domain of [...brand.legacy.domains].sort(
+    (a, b) => b.length - a.length,
+  )) {
     list.push([new RegExp(escapeRegExp(domain), 'gi'), host]);
   }
   if (brand.github?.owner) {
@@ -147,7 +165,8 @@ function rewriteJsonValues(file, replacements) {
       const value = node[key];
       if (typeof value === 'string') {
         let next = value;
-        for (const [pattern, replacement] of replacements) next = next.replace(pattern, replacement);
+        for (const [pattern, replacement] of replacements)
+          next = next.replace(pattern, replacement);
         if (next !== value) {
           node[key] = next;
           changed = true;
@@ -198,7 +217,10 @@ function resolveUpstreamVersion() {
       // fall through to the suffix heuristic below
     }
   }
-  return pkg.version.replace(new RegExp(`-${escapeRegExp(brand.appSlug)}(\\.[0-9]+)?$`), '');
+  return pkg.version.replace(
+    new RegExp(`-${escapeRegExp(brand.appSlug)}(\\.[0-9]+)?$`),
+    '',
+  );
 }
 
 const upstreamVersion = resolveUpstreamVersion();
@@ -213,7 +235,9 @@ pkg.productName = brand.appName;
 pkg.desktopName = `${brand.appSlug}.desktop`;
 pkg.appId = brand.appId;
 pkg.description = brand.description ?? pkg.description;
-pkg.author = brand.author ?? `${brand.appName} Contributors <${brand.supportEmail}> (${brand.website})`;
+pkg.author =
+  brand.author ??
+  `${brand.appName} Contributors <${brand.supportEmail}> (${brand.website})`;
 pkg.homepage = brand.website;
 if (brand.github?.owner && brand.github?.repo) {
   pkg.repository = `https://github.com/${brand.github.owner}/${brand.github.repo}.git`;
@@ -221,7 +245,10 @@ if (brand.github?.owner && brand.github?.repo) {
 pkg.copyright = brand.copyright ?? brand.appId.split('.').slice(0, 2).join('.');
 if (pkg.scripts?.debug) {
   // DEBUG namespaces cannot contain spaces, so use the slug here.
-  pkg.scripts.debug = pkg.scripts.debug.replace(/DEBUG=Ferdium:\*/g, `DEBUG=${brand.appSlug}:*`);
+  pkg.scripts.debug = pkg.scripts.debug.replace(
+    /DEBUG=Ferdium:\*/g,
+    `DEBUG=${brand.appSlug}:*`,
+  );
 }
 writeJson(packagePath, pkg);
 
@@ -250,16 +277,28 @@ writeJson(metadataPath, {
 const eb = path.join(root, 'electron-builder.yml');
 replaceInFile(eb, [
   [/appId: .*/g, `appId: "${brand.appId}"`],
-  [/protocols:\n  name: .*\n  schemes: \[[^\]]+\]/g, `protocols:\n  name: ${brand.appName}\n  schemes: [${brand.protocol}]`],
+  [
+    /protocols:\n[ ]{2}name: .*\n[ ]{2}schemes: \[[^\]]+\]/g,
+    `protocols:\n  name: ${brand.appName}\n  schemes: [${brand.protocol}]`,
+  ],
   [/executableName: .*/g, `executableName: ${brand.appSlug}`],
-  [/synopsis: .*/g, `synopsis: "${brand.description ?? `${brand.appName} desktop app`}"`],
+  [
+    /synopsis: .*/g,
+    `synopsis: "${brand.description ?? `${brand.appName} desktop app`}"`,
+  ],
   [
     /description: 'Ferdium[^']*'/g,
     `description: '${brand.appName} is your cross-platform messaging app which brings your chat & messaging services together into one application. For enabling webcam access you need to connect "camera" plug to snap, and for microphone with PulseAudio the "audio-record" plug. This can be done in Snap GUI or via command: \`snap connect ${brand.appSlug}:camera; snap connect ${brand.appSlug}:audio-record\`.'`,
   ],
-  [/description: '[^']*Ferdium[^']*'/g, `description: '${brand.description ?? `${brand.appName} desktop app`}'`],
+  [
+    /description: '[^']*Ferdium[^']*'/g,
+    `description: '${brand.description ?? `${brand.appName} desktop app`}'`,
+  ],
   [/publisherName: \[.*\]/g, `publisherName: ["${brand.publisherName}"]`],
-  [/unpackDirName: "Ferdium-Unpacked"/g, `unpackDirName: "${brand.appName}-Unpacked"`],
+  [
+    /unpackDirName: "Ferdium-Unpacked"/g,
+    `unpackDirName: "${brand.appName}-Unpacked"`,
+  ],
 ]);
 
 // 3b) Optional recipes fork/submodule override.
@@ -298,7 +337,15 @@ replaceInFile(path.join(root, 'src', 'internal-server', 'env.ini'), [
   [/^APP_NAME=.*$/m, `APP_NAME=${internalServerName}`],
 ]);
 replaceInFile(
-  path.join(root, 'src', 'internal-server', 'app', 'Controllers', 'Http', 'UserController.js'),
+  path.join(
+    root,
+    'src',
+    'internal-server',
+    'app',
+    'Controllers',
+    'Http',
+    'UserController.js',
+  ),
   [
     [/firstname: '[^']*'/, `firstname: ${jsString(brand.appName)}`],
     [/username: '[^']*'/, `username: ${jsString(brand.appName)}`],
@@ -321,11 +368,18 @@ copyIfExists('assets/icon.png', 'build-helpers/images/icon.png');
 copyIfExists('assets/icon.png', 'src/assets/images/icon.png');
 copyIfExists('assets/icons', 'build-helpers/images/icons');
 copyIfExists('assets/icons', 'src/assets/images/icons');
-copyIfExists('assets/installer/dmgInstaller.tiff', 'build-helpers/images/dmgInstaller.tiff');
+copyIfExists(
+  'assets/installer/dmgInstaller.tiff',
+  'build-helpers/images/dmgInstaller.tiff',
+);
 
-console.log(`Applied brand: ${brand.appName} (${brand.appSlug}) v${pkg.version}`);
+console.log(
+  `Applied brand: ${brand.appName} (${brand.appSlug}) v${pkg.version}`,
+);
 console.log(`  version:          ${pkg.version} (upstream ${upstreamVersion})`);
 console.log(`  locale files:     ${rewrittenLocales} rewritten`);
-console.log(`  legacy tokens:    ${brandReplacements.length} replacement rules`);
+console.log(
+  `  legacy tokens:    ${brandReplacements.length} replacement rules`,
+);
 console.log(`  internal server:  ${internalServerName}`);
 console.log('Next: inspect git diff, run pnpm typecheck, then build.');

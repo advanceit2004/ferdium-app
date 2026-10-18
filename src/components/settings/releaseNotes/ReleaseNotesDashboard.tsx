@@ -70,8 +70,7 @@ class ReleaseNotesDashboard extends Component<IProps, IState> {
         <div className="settings__header">
           <span className="settings__header-item">
             {BRAND.appName}{' '}
-            {getFerdiumVersion(window.location.href, ferdiumVersion)}{' '}
-            {' | '}
+            {getFerdiumVersion(window.location.href, ferdiumVersion)} {' | '}
           </span>
           <span className="settings__header-item__secondary">
             {intl.formatMessage(messages.headline)}

@@ -7,8 +7,8 @@ import {
   injectIntl,
 } from 'react-intl';
 import type { StoresProps } from '../../@types/ferdium-components.types';
-import { BRAND } from '../../brand.generated';
 import { serverName } from '../../api/apiBase';
+import { BRAND } from '../../brand.generated';
 import shuffleArray from '../../helpers/array-helpers';
 import serverlessLogin from '../../helpers/serverless-helpers';
 import type RecipePreview from '../../models/RecipePreview';

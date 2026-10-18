@@ -1,9 +1,9 @@
-import { useEffect, useMemo, type ReactNode } from 'react';
+import { type ReactNode, useEffect, useMemo } from 'react';
 import {
+  type IntlShape,
+  RawIntlProvider,
   createIntl,
   createIntlCache,
-  RawIntlProvider,
-  type IntlShape,
 } from 'react-intl';
 
 import { sanitizeBrandText } from './brand-i18n';
@@ -21,6 +21,16 @@ interface Props {
 type FormatMessageArgs = Parameters<IntlShape['formatMessage']>;
 
 /**
+ * Sanitize a `formatMessage` result. Rich-text messages can resolve to an array
+ * of nodes, so walk those instead of assuming a plain string.
+ */
+const sanitizeResult = (value: unknown): unknown => {
+  if (typeof value === 'string') return sanitizeBrandText(value);
+  if (Array.isArray(value)) return value.map(item => sanitizeResult(item));
+  return value;
+};
+
+/**
  * Drop-in replacement for react-intl's `IntlProvider` that routes every
  * formatted message through the brand sanitizer.
  *
@@ -29,13 +39,21 @@ type FormatMessageArgs = Parameters<IntlShape['formatMessage']>;
  * when a locale is missing a key. That fallback never passes through the
  * dictionaries, so we close the gap here in a single place.
  */
-export default function BrandIntlProvider({ locale, messages, children, onIntlChange }: Props) {
+export default function BrandIntlProvider({
+  locale,
+  messages,
+  children,
+  onIntlChange,
+}: Props) {
   const intl = useMemo(() => {
-    const base = createIntl({ locale, defaultLocale: 'en-US', messages }, intlCache);
+    const base = createIntl(
+      { locale, defaultLocale: 'en-US', messages },
+      intlCache,
+    );
 
     const formatMessage = base.formatMessage.bind(base);
     base.formatMessage = ((...args: FormatMessageArgs) =>
-      sanitizeBrandText(formatMessage(...args))) as IntlShape['formatMessage'];
+      sanitizeResult(formatMessage(...args))) as IntlShape['formatMessage'];
 
     return base;
   }, [locale, messages]);
