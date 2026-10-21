@@ -159,6 +159,35 @@ upstream base in `build-helpers/brand-build.json`, so repeated runs and
 cross-brand builds stay idempotent, and an upstream rebase (new `package.json`
 version) always wins over stale metadata.
 
+Note: a suffixed version is a semver *prerelease* of the upstream version, so
+never point a branded build at upstream update feeds — `features.autoUpdates`
+defaults to `false` for exactly this reason.
+
+## Data directory compatibility
+
+The profile folder is resolved at startup (`src/environment-remote.ts` plus the
+pure `src/helpers/profile-dir-helpers.ts`) so a rebranded build never abandons an
+existing installation:
+
+| Situation | Folder used |
+| --- | --- |
+| Brand folder already exists | brand folder (e.g. `Office Web Access`) |
+| Only an upstream folder exists (`legacy.names`, e.g. `Ferdium`) | the upstream folder — the existing profile is adopted in place |
+| Neither exists | brand folder (fresh install) |
+| `FERDIUM_APPDATA_DIR` is set | that path, unchanged (explicit override always wins) |
+| Portable / dev builds | same rules applied to the `AppData` / `Dev` suffix |
+
+These identifiers are kept from upstream **on purpose** because changing them
+would break existing installs, exports or integrations (all allowlisted in
+`docs/brand-allowlist.json`):
+
+- `.ferdium-data` import/export extension (server-side account export)
+- `ferdium-user-*` persisted storage keys and settings sentinels
+- `window.ferdium` preload APIs, `ferdiumVersion`, i18n message ids
+- `org.ferdium.*` D-Bus interface names on Linux
+
+The behaviour is covered by `test/helpers/profile-dir-helpers.test.ts`.
+
 ## Continuous integration
 
 `.github/workflows/white-label-build.yml` takes a brand package location and
