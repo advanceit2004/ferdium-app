@@ -13,24 +13,48 @@ import {
 } from './config';
 import { api as electronApi } from './electron-util';
 import { isWindows } from './environment';
+import { resolveProfileDirName } from './helpers/profile-dir-helpers';
 
 export const { app } = electronApi;
 export const ferdiumVersion: string = app.getVersion();
 export const ferdiumLocale: string = app.getLocale();
+
+/**
+ * Profile directory names of the upstream app, kept so that a rebranded build
+ * adopts an existing installation instead of starting from an empty profile.
+ * The brand directory always wins when both exist, and a fresh install is
+ * created under the brand name.
+ */
+const legacyDataDirNames: readonly string[] = BRAND.legacy?.names ?? [];
+
+const resolveDataDirName = (baseDir: string, suffix = ''): string =>
+  resolveProfileDirName(baseDir, app.name, legacyDataDirNames, suffix);
 
 // Set app directory before loading user modules
 if (process.env.FERDIUM_APPDATA_DIR != null) {
   app.setPath('appData', process.env.FERDIUM_APPDATA_DIR);
   app.setPath('userData', app.getPath('appData'));
 } else if (process.env.PORTABLE_EXECUTABLE_DIR != null) {
+  const dataDirName = resolveDataDirName(
+    process.env.PORTABLE_EXECUTABLE_DIR,
+    'AppData',
+  );
   app.setPath(
     'appData',
-    join(process.env.PORTABLE_EXECUTABLE_DIR, `${app.name}AppData`),
+    join(process.env.PORTABLE_EXECUTABLE_DIR, dataDirName),
   );
-  app.setPath('userData', join(app.getPath('appData'), `${app.name}AppData`));
+  app.setPath('userData', join(app.getPath('appData'), dataDirName));
 } else if (isWindows && process.env.APPDATA != null) {
   app.setPath('appData', process.env.APPDATA);
-  app.setPath('userData', join(app.getPath('appData'), app.name));
+  app.setPath(
+    'userData',
+    join(app.getPath('appData'), resolveDataDirName(app.getPath('appData'))),
+  );
+} else {
+  const dataDirName = resolveDataDirName(app.getPath('appData'));
+  if (dataDirName !== app.name) {
+    app.setPath('userData', join(app.getPath('appData'), dataDirName));
+  }
 }
 
 export const isDevMode: boolean =
@@ -38,7 +62,13 @@ export const isDevMode: boolean =
     ? !app.isPackaged
     : Number.parseInt(process.env.ELECTRON_IS_DEV, 10) === 1;
 if (isDevMode) {
-  app.setPath('userData', join(app.getPath('appData'), `${app.name}Dev`));
+  app.setPath(
+    'userData',
+    join(
+      app.getPath('appData'),
+      resolveDataDirName(app.getPath('appData'), 'Dev'),
+    ),
+  );
 }
 
 export const userDataPath = (...segments: string[]): string => {
