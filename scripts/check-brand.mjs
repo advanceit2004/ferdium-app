@@ -392,9 +392,17 @@ if (!brand.isDefaultFerdium) {
     `appId: "${brand.appId}"`,
     'electron appId',
   );
+  // The packaged app registers the brand scheme first, followed by the upstream
+  // schemes it keeps answering to for backward compatibility.
+  const protocolSchemes = [
+    brand.protocol,
+    ...(brand.legacy?.protocols ?? []).filter(
+      scheme => scheme && scheme !== brand.protocol,
+    ),
+  ];
   assertIncludes(
     'electron-builder.yml',
-    `schemes: [${brand.protocol}]`,
+    `schemes: [${protocolSchemes.join(', ')}]`,
     'protocol scheme',
   );
   assertIncludes(
