@@ -2,6 +2,7 @@ import type * as DeepLinkingModule from '../src/electron/deepLinking';
 
 jest.mock('../src/environment-remote', () => ({
   protocolClient: 'ferdium',
+  protocolClients: ['ferdium'],
 }));
 
 const { default: handleDeepLink, getDeepLinkFromArgs } = jest.requireActual(

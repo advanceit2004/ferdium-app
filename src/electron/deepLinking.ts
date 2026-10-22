@@ -1,22 +1,21 @@
 import type { BrowserWindow } from 'electron';
 
-import { protocolClient } from '../environment-remote';
+import { protocolClients } from '../environment-remote';
+import { stripDeepLinkPrefix } from '../helpers/deeplink-helpers';
 
-const protocolPrefix = `${protocolClient}://`;
+const protocolPrefixes = protocolClients.map(scheme => `${scheme}://`);
 
 export function getDeepLinkFromArgs(args: string[]): string | undefined {
-  return args.find(arg => arg.startsWith(protocolPrefix));
+  return args.find(
+    arg => stripDeepLinkPrefix(arg, protocolPrefixes) !== undefined,
+  );
 }
 
 export default function handleDeepLink(
   window: BrowserWindow,
   rawUrl: string,
 ): void {
-  if (!rawUrl.startsWith(protocolPrefix)) {
-    return;
-  }
-
-  const url = rawUrl.slice(protocolPrefix.length);
+  const url = stripDeepLinkPrefix(rawUrl, protocolPrefixes);
 
   if (!url) {
     return;

@@ -83,6 +83,7 @@ const brand = {
     names: ['Ferdium'],
     domains: ['www.ferdium.org', 'ferdium.org'],
     githubOwners: ['ferdium'],
+    protocols: ['ferdium'],
     tokens: {},
     ...(rawBrand.legacy ?? {}),
   },
@@ -112,6 +113,15 @@ function copyIfExists(fromRel, toRel) {
 
 // Build the ordered find/replace list used for build-time string rewriting.
 // Keep in sync with `buildBrandReplacers()` in `src/i18n/brand-i18n.ts`.
+// Deeplink schemes registered by the packaged app: the brand scheme first, then
+// the upstream schemes, so links created before a rebrand keep working.
+const protocols = [
+  brand.protocol,
+  ...(brand.legacy.protocols ?? []).filter(
+    scheme => scheme && scheme !== brand.protocol,
+  ),
+];
+
 function buildBrandReplacements() {
   const host = String(brand.website ?? '')
     .replace(/^https?:\/\//, '')
@@ -316,7 +326,9 @@ replaceInFile(eb, [
   [/appId: .*/g, `appId: "${brand.appId}"`],
   [
     /protocols:\n[ ]{2}name: .*\n[ ]{2}schemes: \[[^\]]+\]/g,
-    `protocols:\n  name: ${brand.appName}\n  schemes: [${brand.protocol}]`,
+    `protocols:\n  name: ${brand.appName}\n  schemes: [${protocols.join(
+      ', ',
+    )}]`,
   ],
   [/executableName: .*/g, `executableName: ${brand.appSlug}`],
   [

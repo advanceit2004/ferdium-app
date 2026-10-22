@@ -33,7 +33,7 @@ import {
 import { altKey, isLinux, isMac, isWindows } from './environment';
 import {
   isDevMode,
-  protocolClient,
+  protocolClients,
   userDataPath,
   userDataRecipesPath,
 } from './environment-remote';
@@ -627,9 +627,12 @@ app.on('ready', () => {
   // force app to live in /Applications
   enforceMacOSAppLocation();
 
-  // Register App URL
-  if (!app.isDefaultProtocolClient(protocolClient, process.execPath)) {
-    app.setAsDefaultProtocolClient(protocolClient, process.execPath);
+  // Register App URL, including the upstream schemes so existing deeplinks
+  // keep opening this build after a rebrand.
+  for (const protocolClient of protocolClients) {
+    if (!app.isDefaultProtocolClient(protocolClient, process.execPath)) {
+      app.setAsDefaultProtocolClient(protocolClient, process.execPath);
+    }
   }
 
   if (isWindows) {

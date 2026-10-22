@@ -41,6 +41,7 @@ export const BRAND = {
     names: ['Ferdium'],
     domains: ['www.ferdium.org', 'ferdium.org'],
     githubOwners: ['ferdium'],
+    protocols: ['ferdium'],
     tokens: {},
   },
 } as const;
