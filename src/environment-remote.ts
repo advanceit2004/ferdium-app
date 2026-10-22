@@ -13,6 +13,7 @@ import {
 } from './config';
 import { api as electronApi } from './electron-util';
 import { isWindows } from './environment';
+import { deepLinkSchemes } from './helpers/deeplink-helpers';
 import { resolveProfileDirName } from './helpers/profile-dir-helpers';
 
 export const { app } = electronApi;
@@ -111,3 +112,13 @@ export const WEBSITE: string = web;
 export const protocolClient = isDevMode
   ? `${BRAND.protocol}-dev`
   : BRAND.protocol;
+
+/**
+ * Every deeplink scheme this build answers to: the brand scheme first, then the
+ * upstream schemes, so links issued before a rebrand keep working.
+ */
+export const protocolClients: string[] = deepLinkSchemes(
+  BRAND.protocol,
+  BRAND.legacy.protocols ?? [],
+  isDevMode,
+);

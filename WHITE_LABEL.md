@@ -163,7 +163,7 @@ Note: a suffixed version is a semver *prerelease* of the upstream version, so
 never point a branded build at upstream update feeds — `features.autoUpdates`
 defaults to `false` for exactly this reason.
 
-## Data directory compatibility
+## Backward compatibility
 
 The profile folder is resolved at startup (`src/environment-remote.ts` plus the
 pure `src/helpers/profile-dir-helpers.ts`) so a rebranded build never abandons an
@@ -187,6 +187,17 @@ would break existing installs, exports or integrations (all allowlisted in
 - `org.ferdium.*` D-Bus interface names on Linux
 
 The behaviour is covered by `test/helpers/profile-dir-helpers.test.ts`.
+
+### Deeplink schemes
+
+A branded build registers its own scheme **and** the upstream ones (`legacy.protocols`,
+default `["ferdium"]`), so links created before the rebrand keep opening the app:
+
+- `electron-builder.yml` gets `schemes: [<brand>, <legacy...>]`,
+- `src/index.ts` registers every scheme with the OS at startup,
+- `src/electron/deepLinking.ts` accepts any of them (`src/helpers/deeplink-helpers.ts`).
+
+Set `legacy.protocols: []` to stop aliasing upstream links.
 
 ## Continuous integration
 
